@@ -73,3 +73,4 @@ tests/                 unitários e E2E
 - [Privacidade e LGPD](docs/LGPD.md)
 - [Auditoria de conteúdo e pendências](docs/AUDITORIA-CONTEUDO.md)
 - [Design system](docs/DESIGN-SYSTEM.md)
+- [Briefing do vídeo do hero (para o artista 3D)](docs/BRIEFING-VIDEO-HERO.md)

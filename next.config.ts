@@ -11,6 +11,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
+  "media-src 'self' blob: https:",
   `connect-src 'self'${gaConnect}${isDev ? " ws: wss:" : ""}`,
   `frame-src 'self' https://www.google.com https://maps.google.com https://www.openstreetmap.org https://www.youtube-nocookie.com${turnstile}`,
   "worker-src 'self' blob:",

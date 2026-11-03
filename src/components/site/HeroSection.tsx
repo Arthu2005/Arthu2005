@@ -1,4 +1,4 @@
-import { s, type Bag } from "@/lib/content/queries";
+import { img, s, type Bag } from "@/lib/content/queries";
 import { ButtonLink } from "@/components/ui/Button";
 import { HeroStage } from "./HeroStage";
 import { FadeIn, SplitHeadline } from "./Reveal";
@@ -46,7 +46,7 @@ export function HeroSection({ hero, accent }: { hero: Bag; accent: string }) {
 
       {/* Oil stage: on top for mobile (vertical composition), to the right on desktop */}
       <div className="relative order-1 mt-16 h-[46svh] min-h-[300px] w-full md:mt-20 md:h-[52svh] lg:absolute lg:inset-y-0 lg:right-[-6%] lg:mt-0 lg:h-full lg:w-[64%]">
-        <HeroStage accent={accent} />
+        <HeroStage accent={accent} video={{ webm: s(hero, "videoWebm"), mp4: s(hero, "videoMp4"), poster: img(hero, "poster").src }} />
         <FloatingChip className="left-[10%] top-[22%]" kicker="Desde" text="1966 no rerrefino" delay={1.4} />
         <FloatingChip className="bottom-[20%] right-[16%]" kicker="Produto" text="Óleo básico rerrefinado · Grupo I" delay={1.6} />
       </div>

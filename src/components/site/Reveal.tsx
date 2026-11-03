@@ -1,7 +1,23 @@
 "use client";
 
-import { motion, useReducedMotion, type HTMLMotionProps } from "motion/react";
-import type { ReactNode } from "react";
+import { motion, type HTMLMotionProps } from "motion/react";
+import { useSyncExternalStore, type ReactNode } from "react";
+
+const REDUCED_QUERY = "(prefers-reduced-motion: reduce)";
+const subscribeReduced = (cb: () => void) => {
+  const mq = window.matchMedia(REDUCED_QUERY);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+};
+
+/**
+ * prefers-reduced-motion, hydration-safe: the server and the first client render both assume "no preference",
+ * then React re-renders with the real value. (motion's useReducedMotion returns the real value during hydration,
+ * which made the server and client markup differ.)
+ */
+function useReduced() {
+  return useSyncExternalStore(subscribeReduced, () => window.matchMedia(REDUCED_QUERY).matches, () => false);
+}
 
 /** Progressive reveal on scroll (fade + rise). Disabled for prefers-reduced-motion. */
 export function Reveal({
@@ -12,7 +28,7 @@ export function Reveal({
   as = "div",
   ...rest
 }: { children: ReactNode; delay?: number; y?: number; className?: string; as?: "div" | "li" | "section" | "article" } & Omit<HTMLMotionProps<"div">, "children">) {
-  const reduced = useReducedMotion();
+  const reduced = useReduced();
   const Comp = motion[as] as typeof motion.div;
   if (reduced) {
     const Static = as;
@@ -34,7 +50,7 @@ export function Reveal({
 
 /** Splits a headline into words that rise in sequence (cinematic hero entrance). */
 export function SplitHeadline({ text, className, delay = 0 }: { text: string; className?: string; delay?: number }) {
-  const reduced = useReducedMotion();
+  const reduced = useReduced();
   const words = text.split(" ");
   if (reduced) return <span className={className}>{text}</span>;
   return (
@@ -58,7 +74,7 @@ export function SplitHeadline({ text, className, delay = 0 }: { text: string; cl
 }
 
 export function FadeIn({ children, delay = 0, className }: { children: ReactNode; delay?: number; className?: string }) {
-  const reduced = useReducedMotion();
+  const reduced = useReduced();
   if (reduced) return <div className={className}>{children}</div>;
   return (
     <motion.div className={className} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1], delay }}>

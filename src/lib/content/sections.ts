@@ -49,6 +49,19 @@ export const PAGES: PageDef[] = [
           ...cta("primary", "Botão principal"),
           ...cta("secondary", "Botão secundário"),
           { name: "caption", label: "Legenda lateral", type: "text", max: 120 },
+          {
+            name: "videoWebm",
+            label: "Vídeo do hero — WebM VP9 com transparência (Chrome, Edge, Firefox, Android)",
+            type: "url",
+            help: "Opcional. Loop sem som e com fundo transparente, ex.: /videos/hero.webm. Com vídeo configurado, ele substitui o 3D. Especificações em docs/BRIEFING-VIDEO-HERO.md.",
+          },
+          {
+            name: "videoMp4",
+            label: "Vídeo do hero — MP4 HEVC com transparência (Safari, iPhone, Mac)",
+            type: "url",
+            help: "Mesmo vídeo, para navegadores da Apple. Sem ele, o Safari continua exibindo o 3D.",
+          },
+          { name: "poster", label: "Imagem do hero (quadro do vídeo, fundo transparente)", type: "image", help: "Aparece antes do vídeo carregar, para quem prefere menos movimento e quando o vídeo ou o 3D não estiverem disponíveis. Vazio = imagem padrão da escultura." },
         ],
         defaults: {
           eyebrow: "Coleta e rerrefino de OLUC · desde 1966",
