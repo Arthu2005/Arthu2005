@@ -10,6 +10,7 @@ import { Faq } from "@/components/site/Faq";
 import { JobCard } from "@/components/careers/JobCard";
 import { ButtonLink } from "@/components/ui/Button";
 import { VideoEmbed } from "@/components/site/VideoEmbed";
+import { TeamGallery } from "@/components/site/TeamGallery";
 import { bool, getAllSettings, getItems, getPage, img, list, rep, s } from "@/lib/content/queries";
 import { countOpenJobs, getFeaturedJobs } from "@/lib/careers/queries";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -63,16 +64,7 @@ export default async function CarreirasPage() {
       {galleryItems.length > 0 && (
         <section className="container-x pb-24 md:pb-32">
           <SectionHeading eyebrow={s(gallery, "eyebrow")} title={s(gallery, "title")} />
-          <ul className="mt-12 grid grid-cols-2 gap-4 md:gap-5 lg:grid-cols-4">
-            {galleryItems.map((g, i) => (
-              <Reveal as="li" key={i} delay={i * 0.06}>
-                <figure>
-                  <ImageSlot image={img(g, "image")} className="aspect-[4/5] rounded-[var(--radius-card)]" />
-                  {s(g, "caption") && <figcaption className="mt-3 text-sm font-medium text-steel">{s(g, "caption")}</figcaption>}
-                </figure>
-              </Reveal>
-            ))}
-          </ul>
+          <TeamGallery items={galleryItems} className="mt-12" />
         </section>
       )}
 

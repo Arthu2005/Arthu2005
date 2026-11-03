@@ -9,6 +9,7 @@ import { Markdown } from "@/components/Markdown";
 import { ImageSlot } from "@/components/site/ImageSlot";
 import { Provisional } from "@/components/site/Provisional";
 import { SolutionCard } from "@/components/site/SolutionCard";
+import { TeamGallery } from "@/components/site/TeamGallery";
 import { CompanyMetric } from "@/components/site/CompanyMetric";
 import { JobCard } from "@/components/careers/JobCard";
 import { ButtonLink } from "@/components/ui/Button";
@@ -175,6 +176,7 @@ export default async function HomePage() {
             <Markdown source={s(people, "body")} className="mt-6" />
           </Reveal>
         </div>
+        <TeamGallery items={rep(people, "photos")} className="mt-12 md:mt-16" />
       </section>
 
       {/* 9/10. Carreiras + prévia de vagas ---------------------------------------------- */}

@@ -218,12 +218,32 @@ export const PAGES: PageDef[] = [
       {
         key: "people",
         label: "Cultura e pessoas",
-        fields: [...heading, { name: "body", label: "Texto", type: "markdown" }, { name: "image", label: "Imagem", type: "image" }],
+        fields: [
+          ...heading,
+          { name: "body", label: "Texto", type: "markdown" },
+          { name: "image", label: "Imagem principal", type: "image" },
+          {
+            name: "photos",
+            label: "Fotos da equipe (abaixo do texto)",
+            type: "repeater",
+            itemLabel: "Foto",
+            fields: [
+              { name: "image", label: "Foto", type: "image" },
+              { name: "caption", label: "Legenda", type: "text", max: 80 },
+            ],
+          },
+        ],
         defaults: {
           eyebrow: "Pessoas",
           title: "Quem faz o ciclo acontecer.",
           body: "Mais de 490 colaboradores na matriz e nas filiais, do motorista que realiza a coleta à equipe da unidade industrial.",
           image: { src: "/images/equipe/operador-veterano.webp", alt: "Colaborador da PETROLUB de capacete e óculos de proteção, sorrindo na unidade industrial" },
+          photos: [
+            { image: { src: "/images/equipe/atendimento-coleta.webp", alt: "Colaboradora da PETROLUB com headset, sorrindo na estação de atendimento" }, caption: "Atendimento" },
+            { image: { src: "/images/equipe/tecnico-patio.webp", alt: "Colaborador da PETROLUB de capacete, óculos, protetor auricular e colete refletivo no pátio da unidade" }, caption: "Pátio industrial" },
+            { image: { src: "/images/equipe/colaboradora-patio.webp", alt: "Colaboradora da PETROLUB de capacete e colete refletivo, sorrindo no pátio da unidade industrial" }, caption: "Segurança" },
+            { image: { src: "/images/equipe/operador-seguranca.webp", alt: "Operador da PETROLUB colocando o protetor auricular, com capacete, óculos e luvas, na unidade industrial" }, caption: "Operação" },
+          ],
           provisional: false,
           source: OFFICIAL,
         },
