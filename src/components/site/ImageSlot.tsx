@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
 import { cn } from "@/lib/cn";
 import type { ImageValue } from "@/lib/content/fields";
 
@@ -13,6 +14,7 @@ export function ImageSlot({
   tone = "dark",
   priority = false,
   showLabel = true,
+  sizes = "(min-width: 1024px) 50vw, 100vw",
 }: {
   image?: ImageValue | null;
   className?: string;
@@ -20,11 +22,19 @@ export function ImageSlot({
   tone?: "dark" | "light";
   priority?: boolean;
   showLabel?: boolean;
+  /** Rendered width at each breakpoint: the browser uses it to download a file no larger than needed. */
+  sizes?: string;
 }) {
   if (image?.src) {
+    // Files from this site are resized on demand; an external URL typed in the CMS is shown as is.
+    const local = image.src.startsWith("/") && !image.src.startsWith("//") && !image.src.endsWith(".svg");
     return (
       <div className={cn("relative overflow-hidden bg-paper-2", className)}>
-        <img src={image.src} alt={image.alt} loading={priority ? "eager" : "lazy"} decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        {local ? (
+          <Image src={image.src} alt={image.alt} fill sizes={sizes} preload={priority} className="object-cover" />
+        ) : (
+          <img src={image.src} alt={image.alt} loading={priority ? "eager" : "lazy"} decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+        )}
       </div>
     );
   }

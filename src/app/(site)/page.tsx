@@ -18,9 +18,11 @@ import { getFeaturedJobs } from "@/lib/careers/queries";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const meta = await pageMetadata("home", { title: "", path: "/" });
-  // home uses the default (non-templated) title
-  return { ...meta, title: meta.title ? { absolute: String(meta.title) } : undefined };
+  const [meta, { seo }] = await Promise.all([pageMetadata("home", { title: "", path: "/" }), getAllSettings()]);
+  // Home uses the site's default title, without the "· PETROLUB" template. It is always set explicitly:
+  // an undefined title here would erase the layout's default and leave the page with no <title> at all.
+  const title = String(meta.title || s(seo, "defaultTitle") || "PETROLUB Industrial de Lubrificantes");
+  return { ...meta, title: { absolute: title }, openGraph: { ...meta.openGraph, title }, twitter: { ...meta.twitter, title } };
 }
 
 export default async function HomePage() {

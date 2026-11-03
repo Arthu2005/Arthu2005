@@ -146,7 +146,7 @@ export default async function CarreirasPage() {
                 <blockquote className="mt-5 text-lg leading-relaxed">“{s(t.data, "quote")}”</blockquote>
                 <div className="mt-auto flex items-center gap-3 pt-6">
                   {img(t.data, "photo").src ? (
-                    <ImageSlot image={img(t.data, "photo")} className="h-14 w-14 shrink-0 rounded-full ring-2 ring-lime/60 ring-offset-2" />
+                    <ImageSlot image={img(t.data, "photo")} className="h-14 w-14 shrink-0 rounded-full ring-2 ring-lime/60 ring-offset-2" sizes="56px" />
                   ) : (
                     <span className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-accent-deep font-display text-lg font-semibold text-lime" aria-hidden="true">
                       {t.title.split(" ").map((w) => w[0]).slice(0, 2).join("")}

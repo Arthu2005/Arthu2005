@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { Component, useEffect, useRef, useState, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 
@@ -40,7 +41,13 @@ function pickVideo(v: HeroVideo): string | null {
 function detect3d(): Mode {
   try {
     const c = document.createElement("canvas");
-    if (!(c.getContext("webgl2") || c.getContext("webgl"))) return "static";
+    const gl = (c.getContext("webgl2") || c.getContext("webgl")) as WebGLRenderingContext | null;
+    if (!gl) return "static";
+    // Without a real GPU the CPU would draw every frame and the whole page would freeze: keep the poster.
+    const info = gl.getExtension("WEBGL_debug_renderer_info");
+    const renderer = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : "";
+    gl.getExtension("WEBGL_lose_context")?.loseContext();
+    if (/swiftshader|llvmpipe|software|basic render/i.test(renderer)) return "static";
   } catch {
     return "static";
   }
@@ -51,6 +58,19 @@ function detect3d(): Mode {
   // weak devices still get the live scene, at the lighter quality tier
   if (small || cores <= 4 || mem <= 4) return "webgl-medium";
   return "webgl-high";
+}
+
+const INTERACTIONS = ["pointermove", "pointerdown", "touchstart", "wheel", "scroll", "keydown"] as const;
+
+/** Calls `cb` once, on the visitor's first sign of activity. Returns a function that cancels the wait. */
+function onFirstInteraction(cb: () => void) {
+  const off = () => INTERACTIONS.forEach((e) => window.removeEventListener(e, go));
+  const go = () => {
+    off();
+    cb();
+  };
+  INTERACTIONS.forEach((e) => window.addEventListener(e, go, { passive: true }));
+  return off;
 }
 
 /**
@@ -118,9 +138,11 @@ function HeroVideoPlayer({ src, poster, onReady, onError }: { src: string; poste
 /**
  * Chooses how to present the hero visual, best first:
  *  1. a pre-rendered transparent video loop, when one is configured in the CMS and the browser can show its alpha;
- *  2. the real-time WebGL sculpture (two quality tiers);
- *  3. the static poster: no WebGL, data saver on, or anything above failed.
- * Reduced-motion users get the poster instead of the video, or a slower 3D animation.
+ *  2. the real-time WebGL sculpture (two quality tiers), started on the visitor's first interaction;
+ *  3. the static poster: no real GPU, data saver on, or anything above failed.
+ * The poster is the first thing painted, so the three.js bundle and the render loop never delay the page: they
+ * only load once someone is actually using it. Reduced-motion users get the poster instead of the video, or a
+ * slower 3D animation.
  */
 export function HeroStage({ accent, video }: { accent: string; video?: HeroVideo }) {
   const reduced = useReducedMotion() ?? false;
@@ -131,7 +153,8 @@ export function HeroStage({ accent, video }: { accent: string; video?: HeroVideo
   const hasVideo = !!(video?.webm || video?.mp4);
 
   useEffect(() => {
-    // defer the heavy visual until the browser is idle so text (LCP) paints first
+    let cancelInteraction = () => {};
+    // defer the video until the browser is idle, and the 3D until the first interaction, so the page paints first
     const run = () => {
       if (lowData(navigator as Nav)) return setMode("static");
       if (hasVideo) {
@@ -142,11 +165,16 @@ export function HeroStage({ accent, video }: { accent: string; video?: HeroVideo
           return setMode("video");
         }
       }
-      setMode(detect3d());
+      cancelInteraction = onFirstInteraction(() => setMode(detect3d()));
     };
     const w = window as Window & { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number };
-    if (w.requestIdleCallback) w.requestIdleCallback(run, { timeout: 1200 });
-    else setTimeout(run, 300);
+    const idle = w.requestIdleCallback ? w.requestIdleCallback(run, { timeout: 1200 }) : null;
+    const timer = idle === null ? setTimeout(run, 300) : undefined;
+    return () => {
+      cancelInteraction();
+      if (idle !== null) window.cancelIdleCallback?.(idle);
+      clearTimeout(timer);
+    };
   }, [hasVideo, reduced, video]);
 
   const showPoster = mode === "pending" || mode === "static" || (mode === "video" && !videoReady);
@@ -154,11 +182,14 @@ export function HeroStage({ accent, video }: { accent: string; video?: HeroVideo
   return (
     <div className="pointer-events-none absolute inset-0 lg:pointer-events-auto">
       {/* Poster: always rendered underneath, visible until the video / WebGL fades in (and as the static fallback). */}
-      <div
-        className="absolute inset-0 bg-contain bg-center bg-no-repeat transition-opacity duration-700"
-        style={{ backgroundImage: `url("${poster}")`, opacity: showPoster ? 1 : 0.0001 }}
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0 transition-opacity duration-700" style={{ opacity: showPoster ? 1 : 0.0001 }} aria-hidden="true">
+        {poster.startsWith("/") && !poster.startsWith("//") ? (
+          <Image src={poster} alt="" fill preload sizes="(min-width: 1024px) 60vw, 100vw" className="object-contain" />
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={poster} alt="" fetchPriority="high" className="absolute inset-0 h-full w-full object-contain" />
+        )}
+      </div>
       {mode === "video" && videoSrc && (
         <div className="absolute inset-0 transition-opacity duration-700" style={{ opacity: videoReady ? 1 : 0 }}>
           <HeroVideoPlayer

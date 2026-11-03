@@ -10,7 +10,7 @@ export function SolutionCard({ item, index, showMarkers }: { item: PublicItem; i
   return (
     <article className="group relative flex h-full flex-col overflow-hidden rounded-[var(--radius-card)] border border-line bg-white transition-[transform,box-shadow] duration-500 ease-[cubic-bezier(.16,1,.3,1)] hover:-translate-y-1 hover:shadow-[0_30px_60px_-30px_rgb(0_0_0/0.35)]">
       <div className="relative">
-        <ImageSlot image={img(item.data, "image")} className="aspect-[4/3] transition-transform duration-[1200ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.03]" label="Imagem pendente" />
+        <ImageSlot image={img(item.data, "image")} className="aspect-[4/3] transition-transform duration-[1200ms] ease-[cubic-bezier(.16,1,.3,1)] group-hover:scale-[1.03]" label="Imagem pendente" sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" />
         <span className="absolute left-4 top-4 rounded-full bg-white/90 px-2.5 py-1 font-mono text-xs tabular-nums text-ink backdrop-blur">{String(index + 1).padStart(2, "0")}</span>
       </div>
       <div className="flex flex-1 flex-col p-6 md:p-7">

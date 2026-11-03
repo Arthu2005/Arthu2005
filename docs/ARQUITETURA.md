@@ -65,6 +65,8 @@ A iluminação vem de um estúdio de `Lightformer` (sem HDR externo), com sombra
 
 **Modelo GLB do conceito anterior** (`public/models/petrolub-reciclagem-petroleo.glb`, gerado por `npm run model:export`): o símbolo de reciclagem envolvido por petróleo, em pose estática, com materiais PBR separados (`PETROLUB_Verde` e `Petroleo`, ambos com `KHR_materials_clearcoat`), malhas quantizadas e cerca de 87 mil triângulos. Não é usado pelo site; fica disponível para outras peças de comunicação.
 
-`HeroStage` escolhe a qualidade conforme CPU, memória e tela (WebGL alto ou médio; aparelhos fracos ficam no médio). O **pôster estático** (`public/images/oil-poster.webp`) só aparece sem WebGL, no *data saver* ou em 2G. Com `prefers-reduced-motion`, a animação continua, mais lenta e suave. A renderização pausa fora da tela, e a cena só carrega quando o navegador fica ocioso, preservando o LCP (o texto do hero).
+`HeroStage` começa sempre pelo **pôster estático** (`public/images/oil-poster.webp`), que é a primeira imagem pintada. O three.js e a cena só carregam na **primeira interação** do visitante (mover o mouse, tocar, rolar ou usar o teclado), para não travar o carregamento; a partir daí a animação roda sozinha. Quem não interage continua vendo o pôster. Depois disso, a qualidade é escolhida conforme CPU, memória e tela (WebGL alto ou médio). O pôster permanece sem WebGL, em renderizadores de software (sem placa de vídeo), no *data saver* ou em 2G. Com `prefers-reduced-motion`, a animação continua, mais lenta e suave. A renderização pausa fora da tela.
+
+As imagens do site (`ImageSlot`) passam pelo `next/image`, que gera versões menores sob demanda. A prop `sizes` informa a largura real de cada uso, e o navegador baixa só o tamanho necessário.
 
 Para regenerar o pôster após mudar a cena, capture o `<canvas>` da home com fundo transparente e salve como WEBP em `public/images/oil-poster.webp`.
