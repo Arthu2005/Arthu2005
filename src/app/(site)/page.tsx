@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowUpRight, Check } from "lucide-react";
 import { HeroSection } from "@/components/site/HeroSection";
+import { NatureSection } from "@/components/site/NatureSection";
 import { SectionHeading } from "@/components/site/SectionHeading";
 import { Reveal } from "@/components/site/Reveal";
 import { Markdown } from "@/components/Markdown";
@@ -58,6 +59,9 @@ export default async function HomePage() {
           </Reveal>
         </div>
       </section>
+
+      {/* 2b. Compromisso com a natureza -------------------------------------------- */}
+      {p.nature && <NatureSection data={p.nature} marks={marks} />}
 
       {/* 3. Indicadores ------------------------------------------------------------- */}
       {metrics.length > 0 && (

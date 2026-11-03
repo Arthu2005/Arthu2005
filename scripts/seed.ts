@@ -8,7 +8,7 @@
  *        npm run db:seed -- --demo  (base content + demo data)
  */
 import "./_env";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, isNull, sql } from "drizzle-orm";
 
 const { db } = await import("@/lib/db");
 const S = await import("@/lib/db/schema");
@@ -38,6 +38,7 @@ for (const [i, st] of stages.entries()) {
 
 /* Sections ------------------------------------------------------------ */
 let created = 0;
+let refreshed = 0;
 for (const page of PAGES) {
   for (const sec of page.sections) {
     const data = { ...sec.defaults };
@@ -51,12 +52,21 @@ for (const page of PAGES) {
       .onConflictDoNothing()
       .returning({ id: S.contentSections.id });
     created += res.length;
+    if (!res.length && !(page.page === "legal" && sec.key === "privacy")) {
+      // Sections never edited in the admin (updated_by IS NULL) follow the latest defaults in code.
+      const upd = await db
+        .update(S.contentSections)
+        .set({ data, updatedAt: new Date() })
+        .where(and(eq(S.contentSections.page, page.page), eq(S.contentSections.key, sec.key), isNull(S.contentSections.updatedBy), sql`${S.contentSections.data} <> ${JSON.stringify(data)}::jsonb`))
+        .returning({ id: S.contentSections.id });
+      refreshed += upd.length;
+    }
   }
 }
 for (const st of SETTINGS) {
   await db.insert(S.settings).values({ key: st.key, value: st.defaults }).onConflictDoNothing();
 }
-console.log(`✓ Seções: ${created} novas`);
+console.log(`✓ Seções: ${created} novas, ${refreshed} atualizadas (não editadas no painel)`);
 
 /* Collections ---------------------------------------------------------- */
 type Item = { collection: string; slug: string; title: string; status?: "draft" | "published"; data: Record<string, unknown> };

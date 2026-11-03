@@ -53,7 +53,7 @@ export const PAGES: PageDef[] = [
           eyebrow: "Coleta e rerrefino de OLUC · desde 1966",
           title: "Movemos a indústria. Protegemos o futuro.",
           subtitle:
-            "Logística reversa do óleo lubrificante usado ou contaminado, do ponto de coleta ao rerrefino — devolvendo à indústria um óleo básico de alto padrão.",
+            "Coletamos e rerrefinamos o óleo lubrificante usado para que ele não chegue ao solo e à água — e volte à indústria como óleo básico de alto padrão.",
           primaryLabel: "Conheça nossas soluções",
           primaryHref: "/solucoes",
           secondaryLabel: "Trabalhe na PETROLUB",
@@ -82,6 +82,49 @@ export const PAGES: PageDef[] = [
           linkHref: "/empresa",
           provisional: false,
           source: OFFICIAL,
+        },
+      },
+      {
+        key: "nature",
+        label: "Compromisso com a natureza",
+        description: "Mensagem ambiental de destaque na página inicial.",
+        fields: [
+          ...heading,
+          { name: "body", label: "Texto", type: "markdown" },
+          {
+            name: "pillars",
+            label: "Pilares",
+            type: "repeater",
+            itemLabel: "Pilar",
+            fields: [
+              { name: "icon", label: "Ícone", type: "select", options: [
+                { value: "water", label: "Água" },
+                { value: "soil", label: "Solo / planta" },
+                { value: "cycle", label: "Ciclo / reaproveitamento" },
+                { value: "leaf", label: "Folha" },
+              ] },
+              { name: "title", label: "Título", type: "text" },
+              { name: "text", label: "Descrição", type: "textarea" },
+            ],
+          },
+          { name: "image", label: "Imagem (natureza / operação)", type: "image" },
+          ...cta("link", "Link"),
+        ],
+        defaults: {
+          eyebrow: "Compromisso com a natureza",
+          title: "Preservar o que a natureza levou milhões de anos para formar.",
+          body:
+            "O petróleo é um recurso finito. Descartado de forma incorreta, o óleo lubrificante usado contamina o solo e a água. Ao coletar e rerrefinar esse resíduo, a PETROLUB evita esse dano e devolve à cadeia produtiva um óleo básico que volta a ser lubrificante.\n\nÉ assim que cuidamos de um bem valioso para as próximas gerações.",
+          pillars: [
+            { icon: "water", title: "Água protegida", text: "Cada litro recolhido deixa de ameaçar rios, nascentes e lençóis freáticos." },
+            { icon: "soil", title: "Solo preservado", text: "A destinação correta impede que um resíduo perigoso chegue à terra." },
+            { icon: "cycle", title: "Recurso reaproveitado", text: "O rerrefino recupera o óleo básico, que volta à indústria em vez de ser desperdiçado." },
+          ],
+          image: { src: "", alt: "" },
+          linkLabel: "Nossa atuação ambiental",
+          linkHref: "/sustentabilidade",
+          provisional: false,
+          source: "Descrição qualitativa da atividade de coleta e rerrefino de OLUC (petrolub.com.br) e da finalidade da Resolução CONAMA 362/2005. Sem indicadores numéricos.",
         },
       },
       {
@@ -164,7 +207,7 @@ export const PAGES: PageDef[] = [
         defaults: {
           eyebrow: "Sustentabilidade",
           title: "O resíduo de hoje é a matéria-prima de amanhã.",
-          body: "O rerrefino devolve o óleo básico ao mercado e evita o descarte inadequado de um resíduo perigoso. É o centro do nosso negócio, não um projeto paralelo.",
+          body: "Cuidar da natureza é o centro do nosso negócio, não um projeto paralelo: o rerrefino devolve o óleo básico ao mercado e evita o descarte inadequado de um resíduo perigoso.",
           linkLabel: "Qualidade e sustentabilidade",
           linkHref: "/sustentabilidade",
           provisional: false,
