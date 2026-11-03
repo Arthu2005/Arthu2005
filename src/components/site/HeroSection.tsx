@@ -44,25 +44,30 @@ export function HeroSection({ hero, accent }: { hero: Bag; accent: string }) {
       <Curves />
       <div className="grain pointer-events-none absolute inset-0 opacity-50" aria-hidden="true" />
 
-      {/* Oil stage: on top for mobile (vertical composition), to the right on desktop */}
-      <div className="relative order-1 mt-16 h-[46svh] min-h-[300px] w-full md:mt-20 md:h-[52svh] lg:absolute lg:inset-y-0 lg:right-[-6%] lg:mt-0 lg:h-full lg:w-[64%]">
-        <HeroStage accent={accent} video={{ webm: s(hero, "videoWebm"), mp4: s(hero, "videoMp4"), poster: img(hero, "poster").src }} />
-        <FloatingChip className="left-[10%] top-[22%]" kicker="Desde" text="1966 no rerrefino" delay={1.4} />
-        <FloatingChip className="bottom-[20%] right-[16%]" kicker="Produto" text="Óleo básico rerrefinado · Grupo I" delay={1.6} />
-      </div>
-
-      <div className="container-x relative order-2 flex flex-1 flex-col justify-end pb-10 md:pb-14 lg:justify-center lg:pb-0 lg:pt-20">
+      <div className="container-x relative flex flex-1 flex-col pt-24 pb-10 md:pt-28 md:pb-14 lg:static lg:justify-center lg:pb-0 lg:pt-20">
         <div className="max-w-[44rem] xl:max-w-[50rem]">
-          <FadeIn delay={0.1}>
+          <FadeIn delay={0.1} className="relative z-10">
             <p className="eyebrow">{s(hero, "eyebrow")}</p>
           </FadeIn>
-          <h1 id="hero-title" className="mt-5 text-display font-semibold text-ink md:mt-7">
+          <h1 id="hero-title" className="relative z-10 mt-5 text-display font-semibold text-ink md:mt-7">
             <SplitHeadline text={s(hero, "title")} delay={0.2} />
           </h1>
-          <FadeIn delay={0.7}>
+          <FadeIn delay={0.7} className="relative z-10">
             <p className="mt-6 max-w-xl text-lg leading-relaxed text-ink-2 md:mt-8 md:text-xl">{s(hero, "subtitle")}</p>
           </FadeIn>
-          <FadeIn delay={0.85} className="mt-8 flex flex-col gap-3 sm:flex-row md:mt-10">
+
+          {/*
+            Oil stage. A single instance for every layout: in the text flow on mobile and tablet (between the
+            subtitle and the buttons), pulled out to the right half of the section on desktop (the container is
+            static there, so the absolute box is positioned against the section).
+          */}
+          <div className="relative -mx-4 mt-4 h-[42svh] min-h-[280px] md:mx-0 md:h-[48svh] lg:absolute lg:inset-y-0 lg:right-[-6%] lg:mx-0 lg:mt-0 lg:h-full lg:min-h-0 lg:w-[64%]">
+            <HeroStage accent={accent} video={{ webm: s(hero, "videoWebm"), mp4: s(hero, "videoMp4"), poster: img(hero, "poster").src }} />
+            <FloatingChip className="left-[10%] top-[22%]" kicker="Desde" text="1966 no rerrefino" delay={1.4} />
+            <FloatingChip className="bottom-[20%] right-[16%]" kicker="Produto" text="Óleo básico rerrefinado · Grupo I" delay={1.6} />
+          </div>
+
+          <FadeIn delay={0.85} className="relative z-10 mt-4 flex flex-col gap-3 sm:flex-row md:mt-6 lg:mt-10">
             {s(hero, "primaryHref") && (
               <ButtonLink href={s(hero, "primaryHref")} size="lg" arrow>
                 {s(hero, "primaryLabel")}
@@ -77,7 +82,7 @@ export function HeroSection({ hero, accent }: { hero: Bag; accent: string }) {
         </div>
       </div>
 
-      <div className="container-x relative order-3 hidden items-end justify-between pb-8 text-sm text-steel lg:flex">
+      <div className="container-x relative hidden items-end justify-between pb-8 text-sm text-steel lg:flex">
         <p>{s(hero, "caption")}</p>
         <a href="#apresentacao" className="group inline-flex items-center gap-3 rounded-full">
           Role para explorar

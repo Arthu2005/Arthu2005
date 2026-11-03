@@ -200,6 +200,8 @@ function Droplets({ count, time, green }: { count: number; time: React.MutableRe
 
 function Sculpture({ quality, speed }: { quality: Quality; speed: number }) {
   const time = useRef(0);
+  // on phones the stage is a short, wide strip between the text and the buttons: give the loop more room
+  const narrow = useThree((st) => st.size.width < 640);
   const spin = useRef<THREE.Group>(null);
   useFrame((_, delta) => {
     const dt = Math.min(delta, 0.05) * speed;
@@ -208,7 +210,7 @@ function Sculpture({ quality, speed }: { quality: Quality; speed: number }) {
     if (spin.current) spin.current.rotation.z += dt * 0.09;
   });
   return (
-    <group rotation={[-0.62, 0.32, 0.12]} scale={0.78}>
+    <group rotation={[-0.62, 0.32, 0.12]} scale={narrow ? 0.95 : 0.78}>
       <group ref={spin}>
         <MobiusBand quality={quality} time={time} />
         <Droplets count={quality === "high" ? 7 : 5} time={time} green={false} />
