@@ -31,7 +31,7 @@ const seo: SectionDef = {
   defaults: {},
 };
 
-const OFFICIAL = "Fonte: petrolub.com.br (páginas indexadas; site fora do ar) e portal de carreiras oficial, consultados em 11/2026.";
+const OFFICIAL = "Fonte: petrolub.com.br e portal de carreiras oficial, consultados em 11/2026.";
 const CAREERS_PORTAL = "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026.";
 
 export const PAGES: PageDef[] = [
@@ -78,7 +78,7 @@ export const PAGES: PageDef[] = [
           title: "Referência nacional na coleta e no rerrefino de óleo lubrificante usado.",
           body:
             "Desde 1966, a PETROLUB atua com responsabilidade no mercado de coleta e rerrefino de óleo lubrificante usado, assumindo um papel essencial na logística reversa e na preservação dos recursos naturais.\n\nCom processos seguros e eficientes, realizamos a coleta em mais de 1.200 cidades brasileiras, garantindo a destinação correta do óleo usado e transformando milhões de litros em óleo básico, que retorna à cadeia produtiva por meio das formuladoras de lubrificantes. Assim, contribuímos para a economia circular e evitamos impactos ambientais.",
-          image: { src: "/images/brand-oil-green.webp", alt: "Gotas de óleo verde iluminadas, imagem institucional da PETROLUB" },
+          image: { src: "/images/unidades/matriz-sete-lagoas-aerea.webp", alt: "Vista aérea da matriz e unidade de rerrefino da PETROLUB em Sete Lagoas (MG), às margens da BR-040" },
           linkLabel: "Conheça a empresa",
           linkHref: "/empresa",
           provisional: false,
@@ -355,13 +355,34 @@ export const PAGES: PageDef[] = [
         key: "structure",
         label: "Estrutura e áreas de atuação",
         description: "As unidades são cadastradas em Coleções › Unidades.",
-        fields: [...heading, { name: "body", label: "Texto", type: "markdown" }],
+        fields: [
+          ...heading,
+          { name: "body", label: "Texto", type: "markdown" },
+          {
+            name: "photos",
+            label: "Fotos das unidades",
+            type: "repeater",
+            itemLabel: "Foto",
+            fields: [
+              { name: "image", label: "Foto", type: "image" },
+              { name: "caption", label: "Legenda", type: "text", max: 80 },
+            ],
+          },
+        ],
         defaults: {
           eyebrow: "Estrutura",
           title: "Presença operacional em diferentes estados.",
-          body: "Todo o óleo usado coletado é encaminhado à unidade de Sete Lagoas (MG), onde ocorre o rerrefino. Bases de armazenamento temporário apoiam a logística em outras regiões.",
+          body: "A matriz fica em Sete Lagoas (MG), às margens da BR-040, km 461. É ali que se concentra o rerrefino, garantindo a destinação ambientalmente adequada de todo o óleo coletado, e de lá também sai a coleta em todo o estado de Minas Gerais.\n\nAs filiais, distribuídas em diferentes regiões do Brasil, fazem o armazenamento temporário do OLUC coletado em cada área de atuação. Elas contam com parque de tancagem, laboratório próprio e escritório administrativo, estruturados conforme as legislações ambientais e as normas técnicas do setor.",
+          photos: [
+            { image: { src: "/images/unidades/frota-propria.webp", alt: "Caminhões-tanque da frota própria da PETROLUB enfileirados" }, caption: "Frota própria" },
+            { image: { src: "/images/unidades/unidade-tanques.webp", alt: "Tanques verdes de armazenamento em uma unidade da PETROLUB" }, caption: "Tancagem" },
+            { image: { src: "/images/unidades/unidade-galpao.webp", alt: "Galpão operacional e tanque de armazenamento em uma unidade da PETROLUB" }, caption: "Área operacional" },
+            { image: { src: "/images/unidades/filial-duque-de-caxias.webp", alt: "Fachada do escritório da filial de Duque de Caxias (RJ)" }, caption: "Filial Duque de Caxias (RJ)" },
+            { image: { src: "/images/unidades/filial-conceicao-do-jacuipe.webp", alt: "Escritório e tanques da filial de Conceição do Jacuípe (BA)" }, caption: "Filial Conceição do Jacuípe (BA)" },
+            { image: { src: "/images/unidades/unidade-patio-descarga.webp", alt: "Pátio coberto de descarga em uma unidade da PETROLUB" }, caption: "Pátio de descarga" },
+          ],
           provisional: false,
-          source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026.",
+          source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026. Fotos: mídia do site oficial (uso autorizado pelo contratante).",
         },
       },
       {

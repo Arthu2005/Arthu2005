@@ -7,6 +7,7 @@ import { Markdown } from "@/components/Markdown";
 import { ImageSlot } from "@/components/site/ImageSlot";
 import { Provisional } from "@/components/site/Provisional";
 import { CompanyMetric } from "@/components/site/CompanyMetric";
+import { TeamGallery } from "@/components/site/TeamGallery";
 import { ButtonLink } from "@/components/ui/Button";
 import { bool, getAllSettings, getItems, getPage, img, rep, s } from "@/lib/content/queries";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -14,7 +15,7 @@ import { pageMetadata } from "@/lib/seo/metadata";
 export const generateMetadata = (): Promise<Metadata> =>
   pageMetadata("empresa", { title: "A Empresa", description: "História, missão, estrutura e diferenciais da PETROLUB, referência em coleta e rerrefino de óleo lubrificante usado desde 1966.", path: "/empresa" });
 
-const LOCATION_TYPES: Record<string, string> = { matriz: "Matriz e unidade de rerrefino", base: "Base de armazenamento temporário", filial: "Filial" };
+const LOCATION_TYPES: Record<string, string> = { matriz: "Matriz e unidade de rerrefino", base: "Filial · armazenamento temporário", filial: "Filial" };
 
 export default async function EmpresaPage() {
   const [p, settings, timeline, values, locations, metrics] = await Promise.all([
@@ -144,6 +145,7 @@ export default async function EmpresaPage() {
           <Reveal className="mt-8 max-w-2xl">
             <Markdown source={s(structure, "body")} />
           </Reveal>
+          <TeamGallery items={rep(structure, "photos")} landscape className="mt-12" />
           <ul className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {locations.map((l, i) => (
               <Reveal as="li" key={l.id} delay={i * 0.05} className={`rounded-[var(--radius-card)] p-7 ${s(l.data, "type") === "matriz" ? "on-dark brand-deep text-white md:col-span-2 lg:col-span-1 lg:row-span-2" : "border border-line bg-paper"}`}>
@@ -152,7 +154,24 @@ export default async function EmpresaPage() {
                   <MapPin className={`h-5 w-5 ${s(l.data, "type") === "matriz" ? "text-lime" : "text-accent"}`} aria-hidden="true" />
                   {s(l.data, "city")} — {s(l.data, "state")}
                 </h3>
+                {(s(l.data, "since") || s(l.data, "coverage")) && (
+                  <p className={`mt-3 text-[0.95rem] leading-relaxed ${s(l.data, "type") === "matriz" ? "text-white/80" : "text-ink"}`}>
+                    {s(l.data, "since") && <span className="font-medium">Desde {s(l.data, "since")}. </span>}
+                    {s(l.data, "coverage")}
+                  </p>
+                )}
                 {s(l.data, "address") && <p className={`mt-3 text-[0.95rem] ${s(l.data, "type") === "matriz" ? "text-white/65" : "text-steel"}`}>{s(l.data, "address")}</p>}
+                {(s(l.data, "phone") || s(l.data, "email")) && (
+                  <p className={`mt-2 text-sm ${s(l.data, "type") === "matriz" ? "text-white/65" : "text-steel"}`}>
+                    {s(l.data, "phone")}
+                    {s(l.data, "phone") && s(l.data, "email") && <br />}
+                    {s(l.data, "email") && (
+                      <a href={`mailto:${s(l.data, "email")}`} className="underline decoration-current/30 underline-offset-2 hover:decoration-current">
+                        {s(l.data, "email")}
+                      </a>
+                    )}
+                  </p>
+                )}
                 <Provisional show={marks && bool(l.data, "provisional")} className="mt-4" label="Dados a confirmar" />
               </Reveal>
             ))}

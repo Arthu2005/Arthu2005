@@ -106,6 +106,8 @@ export const COLLECTIONS: CollectionDef[] = [
       },
       { name: "city", label: "Cidade", type: "text", required: true },
       { name: "state", label: "UF", type: "text", required: true, max: 2 },
+      { name: "since", label: "Em operação desde (ano)", type: "text", max: 10 },
+      { name: "coverage", label: "Área de atuação", type: "textarea", max: 300 },
       { name: "address", label: "Endereço", type: "textarea" },
       { name: "phone", label: "Telefone", type: "text" },
       { name: "email", label: "E-mail", type: "text" },

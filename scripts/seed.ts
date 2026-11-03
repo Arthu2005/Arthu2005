@@ -84,6 +84,7 @@ const items: Item[] = [
   { collection: "metrics", slug: "frota", title: "Frota", data: { value: "400", label: "Veículos de frota própria", provisional: false, source: OFFICIAL } },
   { collection: "metrics", slug: "litros-mes", title: "Volume", data: { value: "6 mi", label: "Litros de OLUC coletados e rerrefinados por mês", provisional: false, source: "Fonte: petrolub.com.br/quem-somos (“mais de 6 milhões de litros por mês”), consultado em 11/2026." } },
 
+  { collection: "metrics", slug: "litros-ano-evitados", title: "Impacto", data: { value: "70 mi", label: "Litros de óleo usado por ano que deixam de ir para o meio ambiente", provisional: false, source: "Fonte: petrolub.com.br (página inicial e Quem somos), consultado em 11/2026." } },
   { collection: "metrics", slug: "cidades", title: "Cidades", data: { value: "1.200+", label: "Cidades brasileiras atendidas pela coleta", provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante." } },
 
   // Testimonials (published by PETROLUB on its official careers portal)
@@ -101,15 +102,15 @@ const items: Item[] = [
       category: "servico",
       summary: "Retirada do óleo lubrificante usado ou contaminado (OLUC) com frota própria e emissão do Certificado de Coleta (CCO).",
       description:
-        "A PETROLUB realiza a coleta do óleo lubrificante usado ou contaminado gerado por empresas, com frota própria de aproximadamente 400 veículos. Todo o óleo coletado é encaminhado à unidade de rerrefino em Sete Lagoas (MG).\n\nA solicitação de coleta pode ser feita pelo 0800 ou pelos contatos comerciais regionais.",
+        "A PETROLUB realiza a coleta de OLUC em mais de 1.200 municípios de todo o país, em conformidade com as normas ambientais e regulatórias, assegurando a destinação ambientalmente adequada: o rerrefino.\n\nA frota própria, de cerca de 400 veículos, reúne caminhões e carretas com capacidade de 2.000 a 60.000 litros, distribuídos em diferentes regiões do Brasil. Coleta e transporte são de responsabilidade exclusiva da PETROLUB, com veículos adequados e profissionais treinados. Todo o óleo coletado segue para a unidade de rerrefino em Sete Lagoas (MG).\n\nA solicitação de coleta pode ser feita pelo 0800, pelo formulário de contato ou com a filial da sua região.",
       applications: ["Destinação de óleo lubrificante usado ou contaminado (OLUC)"],
       segments: [],
       specs: [],
-      image: { src: "", alt: "" },
+      image: { src: "/images/unidades/motorista-coleta.webp", alt: "Motorista da PETROLUB conectando a mangueira de coleta ao caminhão-tanque" },
       documents: [],
       featured: true,
       provisional: false,
-      source: `${OFFICIAL} Segmentos atendidos: aguardando lista oficial.`,
+      source: `Fonte: petrolub.com.br/servicos e /quem-somos, consultado em 11/2026. Segmentos atendidos: aguardando lista oficial.`,
     },
   },
   {
@@ -120,11 +121,11 @@ const items: Item[] = [
       category: "servico",
       summary: "Processo industrial que remove impurezas e aditivos degradados do óleo usado e recupera o óleo básico.",
       description:
-        "Na unidade industrial de Sete Lagoas (MG), o óleo lubrificante usado passa pelo rerrefino: um processo que remove impurezas e aditivos degradados, recuperando o óleo básico para uso como matéria-prima de novos lubrificantes.\n\n*Detalhes técnicos do processo (etapas, tecnologia e capacidade) devem ser fornecidos pela equipe técnica da PETROLUB.*",
+        "Todo o OLUC coletado pela PETROLUB nas diferentes regiões do país é destinado, de forma exclusiva, à unidade industrial de rerrefino em Sete Lagoas (MG).\n\nO rerrefino é um processo industrial que remove impurezas, contaminantes e aditivos degradados do óleo usado. O resultado é a recuperação do óleo básico, que retorna à cadeia produtiva como matéria-prima para novos óleos lubrificantes, fechando um ciclo sustentável para esse resíduo.",
       applications: [],
       segments: [],
       specs: [],
-      image: { src: "", alt: "" },
+      image: { src: "/images/unidades/matriz-sete-lagoas-aerea-2.webp", alt: "Vista aérea da matriz e unidade de rerrefino da PETROLUB em Sete Lagoas (MG)" },
       documents: [],
       featured: true,
       provisional: false,
@@ -139,15 +140,15 @@ const items: Item[] = [
       category: "produto",
       summary: "Óleo básico classificado como Grupo I, produzido em conformidade com as especificações estabelecidas pela ANP.",
       description:
-        "O rerrefino gera o Óleo Básico Rerrefinado classificado como Grupo I (GI), com elevado padrão de qualidade e em conformidade com as especificações estabelecidas pela ANP. O produto é matéria-prima para a formulação de novos lubrificantes.\n\n*Ficha técnica, laudos e propriedades devem ser cadastrados a partir de documentos oficiais.*",
+        "O rerrefino gera o Óleo Básico Rerrefinado classificado como Grupo I (GI), com elevado padrão de qualidade e em conformidade com as especificações estabelecidas pela ANP. Ele é destinado a grandes produtoras de óleos lubrificantes automotivos e industriais, que o reintroduzem no mercado.\n\nÉ a alternativa sustentável para indústrias e distribuidores: ao adquirir o óleo básico rerrefinado (RR), a empresa contribui para a economia circular, diminui a dependência de recursos fósseis e fortalece práticas de ESG. Para cotação, informe razão social, CNPJ, autorização da ANP, volume pretendido (m³) e se a demanda é mensal ou pontual.\n\n*Ficha técnica, laudos e propriedades devem ser cadastrados a partir de documentos oficiais.*",
       applications: ["Matéria-prima para formulação de lubrificantes"],
       segments: [],
       specs: [],
-      image: { src: "", alt: "" },
+      image: { src: "/images/unidades/parque-de-tancagem.webp", alt: "Vista aérea do parque de tancagem de uma unidade da PETROLUB" },
       documents: [],
       featured: true,
       provisional: false,
-      source: "Fonte: petrolub.com.br/servicos, consultado em 11/2026. Especificações técnicas: pendentes (não inventar).",
+      source: "Fonte: petrolub.com.br/servicos e /compre-oleo-rr, consultado em 11/2026. Especificações técnicas: pendentes (não inventar).",
     },
   },
   {
@@ -162,7 +163,7 @@ const items: Item[] = [
       applications: ["Comprovação de destinação de resíduos", "Apoio a auditorias e licenciamento do gerador"],
       segments: [],
       specs: [],
-      image: { src: "", alt: "" },
+      image: { src: "/images/unidades/equipe-atendimento.webp", alt: "Equipe de atendimento da PETROLUB com headsets no escritório" },
       documents: [],
       featured: false,
       provisional: false,
@@ -172,25 +173,35 @@ const items: Item[] = [
 
   // Timeline
   { collection: "timeline", slug: "1966", title: "Início da atuação", data: { year: "1966", text: "Início da atuação no mercado de coleta e rerrefino de óleo lubrificante usado.", provisional: false, source: OFFICIAL } },
-  { collection: "timeline", slug: "hoje", title: "Operação nacional", data: { year: "Hoje", text: "Mais de 490 colaboradores, frota própria e bases de armazenamento em diferentes estados.", provisional: false, source: OFFICIAL } },
+  { collection: "timeline", slug: "2003", title: "Filial Linhares (ES)", data: { year: "2003", text: "Início da operação em Linhares, atendendo o Espírito Santo, a Zona da Mata mineira e o sul da Bahia.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "2004", title: "Filial Duque de Caxias (RJ)", data: { year: "2004", text: "Início da operação em Duque de Caxias, atendendo o Rio de Janeiro e o sul de Minas Gerais.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "2007", title: "Filial Aparecida de Goiânia (GO)", data: { year: "2007", text: "Início da operação em Aparecida de Goiânia, atendendo o Centro-Oeste, o Triângulo Mineiro e localidades do Norte e do Nordeste.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "2019", title: "Filial Americana (SP)", data: { year: "2019", text: "Início da operação em Americana, atendendo todo o estado de São Paulo.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "2024", title: "Filiais na Bahia e no Paraná", data: { year: "2024", text: "Início das operações em Conceição do Jacuípe (BA), para a Bahia e o Nordeste, e em Pinhais (PR), para a região Sul.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "hoje", title: "60 anos", data: { year: "Hoje", text: "60 anos de mercado, mais de 490 colaboradores, frota própria de cerca de 400 veículos e coleta em mais de 1.200 municípios.", provisional: false, source: "Fonte: petrolub.com.br/quem-somos, consultado em 11/2026." } },
 
   // Locations
   {
     collection: "locations",
     slug: "sete-lagoas",
     title: "Matriz — Sete Lagoas",
-    data: { type: "matriz", city: "Sete Lagoas", state: "MG", address: "Rod. Pres. Juscelino Kubitschek (BR-040), km 461 — Zona Rural · CEP 35701-970", phone: "+55 (31) 2106-2800", email: "contato@petrolub.com.br", provisional: false, source: "Fonte: petrolub.com.br/contato, consultado em 11/2026." },
+    data: { type: "matriz", city: "Sete Lagoas", state: "MG", since: "1966", coverage: "Rerrefino de todo o OLUC coletado e coleta em Minas Gerais", address: "Rod. Pres. Juscelino Kubitschek (BR-040), km 461 — Zona Rural · CEP 35701-970", phone: "+55 (31) 2106-2800", email: "contato@petrolub.com.br", provisional: false, source: "Fonte: petrolub.com.br/contato e /estrutura-e-filiais, consultado em 11/2026." },
   },
-  ...[
-    ["duque-de-caxias", "Duque de Caxias", "RJ"],
-    ["americana", "Americana", "SP"],
-    ["conceicao-do-jacuipe", "Conceição do Jacuípe", "BA"],
-    ["pinhais", "Pinhais", "PR"],
-  ].map(([slug, city, uf]) => ({
+  // Filiais: temporary storage of the OLUC collected in each region (all oil is re-refined in Sete Lagoas)
+  ...(
+    [
+      ["linhares", "Linhares", "ES", "2003", "Espírito Santo, Zona da Mata de Minas Gerais e sul da Bahia", "Av. Padre Manoel da Nóbrega, 61 — Bairro Interlagos · CEP 29903-490", "(27) 3373-5310 · (31) 99618-9282", "comercial.es@petrolub.com.br"],
+      ["duque-de-caxias", "Duque de Caxias", "RJ", "2004", "Rio de Janeiro e sul de Minas Gerais", "Rua Projetada, 75 — Bairro Jardim Primavera · CEP 25213-187", "(21) 2676-9398 · (31) 97187-5517", "comercial.rj@petrolub.com.br"],
+      ["aparecida-de-goiania", "Aparecida de Goiânia", "GO", "2007", "Centro-Oeste, Triângulo Mineiro e localidades do Norte e do Nordeste", "Av. Guatacazes, s/n — Bairro Jardim Eldorado · CEP 74993-090", "(62) 3283-4070 · (62) 3283-7075 · (31) 99961-4222", "comercial.go@petrolub.com.br"],
+      ["americana", "Americana", "SP", "2019", "Todo o estado de São Paulo", "Rua do Marceneiro, 302 — Quadra D, Lote 21 · CEP 13478-722", "(31) 97241-3034 · (31) 99767-3865", "comercial.sp@petrolub.com.br"],
+      ["conceicao-do-jacuipe", "Conceição do Jacuípe", "BA", "2024", "Bahia e região Nordeste", "Loteamento Lagoa do Bosque, s/n — Quadra A1, Lote 01, Centro · CEP 44245-000", "(75) 99841-9738 · (31) 99938-5972", "comercial.ba@petrolub.com.br"],
+      ["pinhais", "Pinhais", "PR", "2024", "Região Sul do Brasil", "Rua Salgado Filho, 211 — Jardim Amélia · CEP 83330-110", "(31) 97241-3034", "comercial.pr@petrolub.com.br"],
+    ] as const
+  ).map(([slug, city, uf, since, coverage, address, phone, email]) => ({
     collection: "locations",
-    slug: slug!,
-    title: `Base — ${city}`,
-    data: { type: "base", city, state: uf, address: "", phone: "", email: "", provisional: true, source: "Fonte: petrolub.com.br/estrutura-e-filiais (via busca), consultado em 11/2026. Confirmar endereço e contatos." },
+    slug,
+    title: `Filial — ${city}`,
+    data: { type: "base", city, state: uf, since, coverage, address, phone, email, provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais e /coleta, consultado em 11/2026." },
   })),
 
   // Sustainability & quality
@@ -228,6 +239,7 @@ const items: Item[] = [
 ];
 
 let itemsCreated = 0;
+let itemsUpdated = 0;
 for (const [i, it] of items.entries()) {
   const res = await db
     .insert(S.contentItems)
@@ -235,8 +247,23 @@ for (const [i, it] of items.entries()) {
     .onConflictDoNothing()
     .returning({ id: S.contentItems.id });
   itemsCreated += res.length;
+  if (res.length) continue;
+  // Items never edited in the admin (updated_by IS NULL) follow the latest defaults in code.
+  const upd = await db
+    .update(S.contentItems)
+    .set({ title: it.title, sortOrder: i, data: it.data })
+    .where(
+      and(
+        eq(S.contentItems.collection, it.collection),
+        eq(S.contentItems.slug, it.slug),
+        isNull(S.contentItems.updatedBy),
+        sql`(${S.contentItems.data} <> ${JSON.stringify(it.data)}::jsonb OR ${S.contentItems.title} <> ${it.title} OR ${S.contentItems.sortOrder} <> ${i})`,
+      ),
+    )
+    .returning({ id: S.contentItems.id });
+  itemsUpdated += upd.length;
 }
-console.log(`✓ Itens de coleção: ${itemsCreated} novos`);
+console.log(`✓ Itens de coleção: ${itemsCreated} novos, ${itemsUpdated} atualizados (não editados no painel)`);
 
 /* Demo data ------------------------------------------------------------ */
 if (withDemo) {
