@@ -7,22 +7,32 @@ const bool = (def: boolean) =>
     .optional()
     .transform((v) => (v === undefined || v === "" ? def : ["1", "true", "yes"].includes(v.toLowerCase())));
 
+/*
+ * Platform-aware defaults (Vercel): the database URL may come from the Neon/Supabase integration
+ * (POSTGRES_URL), the public URL from the project domain, uploads must fit the 4.5 MB request cap and
+ * only /tmp is writable (ephemeral — use STORAGE_DRIVER=s3 in production).
+ */
+const onVercel = Boolean(process.env.VERCEL);
+const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+const pooled = /-pooler\.|:6543\b|pgbouncer=true/.test(dbUrl);
+const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL || process.env.VERCEL_URL;
+
 const schema = z.object({
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
-  DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatória"),
-  DATABASE_POOL_MAX: z.coerce.number().int().positive().default(10),
-  DATABASE_PREPARE: bool(true),
-  APP_URL: z.string().url().default("http://localhost:3000"),
+  DATABASE_URL: z.string().min(1, "DATABASE_URL é obrigatória (ou conecte um banco Postgres ao projeto na Vercel)").default(dbUrl),
+  DATABASE_POOL_MAX: z.coerce.number().int().positive().default(onVercel ? 2 : 10),
+  DATABASE_PREPARE: bool(!pooled),
+  APP_URL: z.string().url().default(vercelUrl ? `https://${vercelUrl}` : "http://localhost:3000"),
   APP_SECRET: z.string().min(32, "APP_SECRET deve ter pelo menos 32 caracteres"),
   STORAGE_DRIVER: z.enum(["local", "s3"]).default("local"),
-  STORAGE_LOCAL_DIR: z.string().default("./storage"),
+  STORAGE_LOCAL_DIR: z.string().default(onVercel ? "/tmp/petrolub-storage" : "./storage"),
   S3_ENDPOINT: z.string().optional(),
   S3_REGION: z.string().default("us-east-1"),
   S3_BUCKET: z.string().optional(),
   S3_ACCESS_KEY_ID: z.string().optional(),
   S3_SECRET_ACCESS_KEY: z.string().optional(),
   S3_FORCE_PATH_STYLE: bool(true),
-  UPLOAD_MAX_MB: z.coerce.number().positive().max(20).default(5),
+  UPLOAD_MAX_MB: z.coerce.number().positive().max(20).default(onVercel ? 4 : 5),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().default(587),
   SMTP_SECURE: bool(false),

@@ -20,6 +20,22 @@ Modelo completo em [`.env.example`](../.env.example). Nunca faça commit de `.en
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile |
 | `NEXT_PUBLIC_GA_ID` | — | GA4, carregado **somente após consentimento** |
 
+## Publicar na Vercel em poucos cliques (prévia)
+
+O script `vercel-build` aplica as migrações, insere o conteúdo inicial e cria o primeiro administrador antes do `next build`. Os padrões se ajustam sozinhos na Vercel: URL do domínio, banco com pooler, limite de upload de 4 MB (a Vercel aceita até 4,5 MB por requisição) e arquivos em `/tmp`.
+
+1. Em [vercel.com/new](https://vercel.com/new), importe o repositório `Arthu2005/Arthu2005` (framework detectado: Next.js).
+2. Em *Environment Variables*, adicione:
+   - `APP_SECRET` — 64 caracteres aleatórios;
+   - `ADMIN_EMAIL` e `ADMIN_PASSWORD` (mín. 12 caracteres, letras e números) — seu acesso ao `/admin`;
+   - `SEED_DEMO=1` — opcional, para ver vagas de demonstração.
+3. Clique em *Deploy*. O primeiro build falha com “DATABASE_URL não definida”: é esperado, ainda falta o banco.
+4. No projeto, abra *Storage › Create Database › Neon (Postgres)* e conecte-o ao projeto (a Vercel cria `DATABASE_URL`/`POSTGRES_URL`).
+5. Em *Deployments*, use *Redeploy*. Ao terminar, o site abre no domínio `*.vercel.app` e o painel em `/admin`.
+6. Depois de entrar no painel, remova `ADMIN_PASSWORD` das variáveis do projeto.
+
+> **Limitação da prévia:** sem `STORAGE_DRIVER=s3`, currículos e imagens ficam em `/tmp`, que é temporário na Vercel — podem sumir entre execuções. Para uso real, configure um bucket privado (Opção A abaixo, passo 2).
+
 ## Opção A — Vercel + Supabase
 
 1. Crie o projeto no Supabase. Em *Database › Connection string*, copie a URL do **pooler (transaction)** e defina `DATABASE_PREPARE=false`, `DATABASE_POOL_MAX=1`.

@@ -18,7 +18,7 @@ const { PRIVACY_TEMPLATE } = await import("@/lib/content/privacy-template");
 const { protocolCode } = await import("@/lib/crypto");
 const { addMonths } = await import("@/lib/labels");
 
-const withDemo = process.argv.includes("--demo");
+const withDemo = process.argv.includes("--demo") || ["1", "true"].includes(String(process.env.SEED_DEMO).toLowerCase());
 const OFFICIAL = "Fonte: petrolub.com.br, consultado em 11/2026.";
 
 /* Pipeline ------------------------------------------------------------ */
@@ -331,6 +331,26 @@ if (withDemo) {
     }
   }
   console.log("✓ Dados de demonstração criados (is_demo = true)");
+}
+
+/* Bootstrap admin (hosted deploys without shell access) ------------------------------
+ * If ADMIN_EMAIL + ADMIN_PASSWORD are set and no administrator exists yet, create one.
+ * Never overwrites an existing account. Remove the variables after the first login. */
+if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+  const { hashPassword, passwordPolicyError } = await import("@/lib/auth/password");
+  const [anyAdmin] = await db.select({ id: S.users.id }).from(S.users).where(eq(S.users.role, "admin")).limit(1);
+  const policy = passwordPolicyError(process.env.ADMIN_PASSWORD);
+  if (anyAdmin) console.log("• Administrador já existe — ADMIN_EMAIL/ADMIN_PASSWORD ignorados");
+  else if (policy) console.warn(`⚠ ADMIN_PASSWORD rejeitada: ${policy}`);
+  else {
+    await db.insert(S.users).values({
+      email: process.env.ADMIN_EMAIL.trim().toLowerCase(),
+      name: process.env.ADMIN_NAME?.trim() || "Administrador",
+      role: "admin",
+      passwordHash: await hashPassword(process.env.ADMIN_PASSWORD),
+    });
+    console.log(`✓ Administrador ${process.env.ADMIN_EMAIL} criado`);
+  }
 }
 
 process.exit(0);

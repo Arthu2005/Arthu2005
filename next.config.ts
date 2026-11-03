@@ -29,7 +29,7 @@ const securityHeaders = [
   ...(isDev ? [] : [{ key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }]),
 ];
 
-const uploadMb = Number(process.env.UPLOAD_MAX_MB ?? 5);
+const uploadMb = Number(process.env.UPLOAD_MAX_MB || (process.env.VERCEL ? 4 : 5));
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
