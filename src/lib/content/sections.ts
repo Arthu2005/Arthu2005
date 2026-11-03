@@ -31,7 +31,8 @@ const seo: SectionDef = {
   defaults: {},
 };
 
-const OFFICIAL = "Fonte: petrolub.com.br (página inicial / Quem Somos), consultado em 11/2026.";
+const OFFICIAL = "Fonte: petrolub.com.br (páginas indexadas; site fora do ar) e portal de carreiras oficial, consultados em 11/2026.";
+const CAREERS_PORTAL = "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026.";
 
 export const PAGES: PageDef[] = [
   {
@@ -76,12 +77,12 @@ export const PAGES: PageDef[] = [
           eyebrow: "A PETROLUB",
           title: "Referência nacional na coleta e no rerrefino de óleo lubrificante usado.",
           body:
-            "Desde 1966, a PETROLUB atua no mercado de coleta e rerrefino de óleo lubrificante usado ou contaminado (OLUC), com forte compromisso com a preservação ambiental por meio da logística reversa.\n\nO óleo coletado é encaminhado à unidade industrial de Sete Lagoas (MG), onde o rerrefino remove impurezas e aditivos degradados e recupera o óleo básico, matéria-prima para novos lubrificantes.",
-          image: { src: "", alt: "" },
+            "Desde 1966, a PETROLUB atua com responsabilidade no mercado de coleta e rerrefino de óleo lubrificante usado, assumindo um papel essencial na logística reversa e na preservação dos recursos naturais.\n\nCom processos seguros e eficientes, realizamos a coleta em mais de 1.200 cidades brasileiras, garantindo a destinação correta do óleo usado e transformando milhões de litros em óleo básico, que retorna à cadeia produtiva por meio das formuladoras de lubrificantes. Assim, contribuímos para a economia circular e evitamos impactos ambientais.",
+          image: { src: "/images/brand-oil-green.webp", alt: "Gotas de óleo verde iluminadas, imagem institucional da PETROLUB" },
           linkLabel: "Conheça a empresa",
           linkHref: "/empresa",
           provisional: false,
-          source: OFFICIAL,
+          source: CAREERS_PORTAL,
         },
       },
       {
@@ -120,7 +121,7 @@ export const PAGES: PageDef[] = [
             { icon: "soil", title: "Solo preservado", text: "A destinação correta impede que um resíduo perigoso chegue à terra." },
             { icon: "cycle", title: "Recurso reaproveitado", text: "O rerrefino recupera o óleo básico, que volta à indústria em vez de ser desperdiçado." },
           ],
-          image: { src: "", alt: "" },
+          image: { src: "/images/brand-oil-green.webp", alt: "Gotas de óleo verde iluminadas, imagem institucional da PETROLUB" },
           linkLabel: "Nossa atuação ambiental",
           linkHref: "/sustentabilidade",
           provisional: false,
@@ -233,8 +234,8 @@ export const PAGES: PageDef[] = [
         fields: [...heading, { name: "body", label: "Texto", type: "textarea" }, ...cta("link", "Link")],
         defaults: {
           eyebrow: "Carreiras",
-          title: "Seu próximo movimento começa aqui.",
-          body: "Conheça as oportunidades abertas e candidate-se direto pelo site.",
+          title: "Cada gota de óleo conta. E cada talento também.",
+          body: "Junte-se ao nosso time: conheça as oportunidades abertas e candidate-se direto pelo site.",
           linkLabel: "Ver todas as vagas",
           linkHref: "/carreiras/vagas",
           provisional: false,
@@ -472,7 +473,7 @@ export const PAGES: PageDef[] = [
         defaults: {
           eyebrow: "Carreiras",
           title: "Seu próximo movimento começa aqui.",
-          subtitle: "Conheça nossas oportunidades e descubra como construir sua trajetória profissional com a PETROLUB.",
+          subtitle: "Cada gota de óleo conta. E cada talento também. Conheça nossas oportunidades e construa sua trajetória com a PETROLUB.",
           image: { src: "", alt: "" },
           provisional: false,
           source: "",
@@ -485,10 +486,10 @@ export const PAGES: PageDef[] = [
         defaults: {
           eyebrow: "Ambiente de trabalho",
           title: "Uma operação nacional feita por pessoas.",
-          body: "São mais de 490 colaboradores entre a matriz em Sete Lagoas (MG) e as filiais — em funções de logística, operação industrial, laboratório, manutenção, comercial e administrativo.\n\n*Descrição detalhada da cultura e do ambiente de trabalho a ser fornecida pelo RH.*",
-          image: { src: "", alt: "" },
-          provisional: true,
-          source: `${OFFICIAL} Lista de áreas é ilustrativa e deve ser validada pelo RH.`,
+          body: "Nosso compromisso vai além do meio ambiente: buscamos oferecer um ambiente de trabalho saudável, transparente e seguro, valorizando a confiança e o bem-estar da nossa equipe.\n\nSão mais de 490 colaboradores entre a matriz em Sete Lagoas (MG) e as filiais.",
+          image: { src: "/images/brand-banner.webp", alt: "Banner institucional da PETROLUB com gotas de óleo verde" },
+          provisional: false,
+          source: `${CAREERS_PORTAL} Número de colaboradores: petrolub.com.br (indexado).`,
         },
       },
       {
@@ -513,6 +514,19 @@ export const PAGES: PageDef[] = [
           items: ["Logística e coleta", "Operação industrial", "Qualidade e laboratório", "Manutenção", "Comercial", "Administrativo e financeiro", "Saúde, segurança e meio ambiente"],
           provisional: true,
           source: "Lista proposta — validar com o RH.",
+        },
+      },
+      {
+        key: "video",
+        label: "Vídeo institucional",
+        fields: [...heading, { name: "body", label: "Texto", type: "textarea" }, { name: "url", label: "Link do vídeo no YouTube", type: "url" }],
+        defaults: {
+          eyebrow: "Por dentro da PETROLUB",
+          title: "Conheça quem faz o ciclo acontecer.",
+          body: "Assista ao vídeo institucional e veja de perto a nossa operação.",
+          url: "https://www.youtube.com/watch?v=ioblJRoqwsg",
+          provisional: false,
+          source: CAREERS_PORTAL,
         },
       },
       {

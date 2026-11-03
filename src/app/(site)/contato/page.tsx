@@ -83,6 +83,11 @@ export default async function ContatoPage({ searchParams }: Props) {
                 Instagram ↗<span className="sr-only"> (abre em nova aba)</span>
               </a>
             )}
+            {s(social, "facebook") && (
+              <a href={s(social, "facebook")} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line bg-white px-4 py-2 font-medium hover:border-ink/30">
+                Facebook ↗<span className="sr-only"> (abre em nova aba)</span>
+              </a>
+            )}
             {s(social, "linkedin") && (
               <a href={s(social, "linkedin")} target="_blank" rel="noopener noreferrer" className="rounded-full border border-line bg-white px-4 py-2 font-medium hover:border-ink/30">
                 LinkedIn ↗<span className="sr-only"> (abre em nova aba)</span>

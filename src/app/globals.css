@@ -25,13 +25,13 @@
      deep    = verde escuro institucional (identity, highlights)
      forest  = darkest green for dark surfaces
      lime    = verde-limão (details, lines, icons, gradients) */
-  --color-accent: var(--brand-accent, #0a8539);
+  --color-accent: var(--brand-accent, #1c782b);
   --color-accent-ink: var(--brand-accent-ink, #0b5a30);
   --color-accent-deep: #0a3d22;
   --color-forest: #062b17;
   --color-lime: #a6e22e;
   --color-signal: #c0352b;
-  --color-ok: #0a8539;
+  --color-ok: #1c782b;
 
   --text-display: clamp(2.6rem, 1.3rem + 5vw, 6.4rem);
   --text-display--line-height: 0.95;

@@ -308,7 +308,7 @@ function Studio({ accent }: { accent: string }) {
   );
 }
 
-export default function PetroleumScene({ accent = "#0a8539", reducedMotion = false, quality = "high" }: { accent?: string; reducedMotion?: boolean; quality?: Quality }) {
+export default function PetroleumScene({ accent = "#1c782b", reducedMotion = false, quality = "high" }: { accent?: string; reducedMotion?: boolean; quality?: Quality }) {
   const wrapper = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(true);
   const [ready, setReady] = useState(false);

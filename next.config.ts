@@ -12,7 +12,7 @@ const csp = [
   "img-src 'self' data: blob: https:",
   "font-src 'self' data:",
   `connect-src 'self'${gaConnect}${isDev ? " ws: wss:" : ""}`,
-  `frame-src 'self' https://www.google.com https://maps.google.com https://www.openstreetmap.org${turnstile}`,
+  `frame-src 'self' https://www.google.com https://maps.google.com https://www.openstreetmap.org https://www.youtube-nocookie.com${turnstile}`,
   "worker-src 'self' blob:",
   "object-src 'none'",
   "base-uri 'self'",

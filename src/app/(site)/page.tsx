@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function HomePage() {
   const [p, settings, metrics, solutions, jobs] = await Promise.all([getPage("home"), getAllSettings(), getItems("metrics"), getItems("solutions"), getFeaturedJobs(3)]);
   const marks = bool(settings.general, "showProvisionalMarkers");
-  const accent = s(settings.general, "accentColor") || "#0a8539";
+  const accent = s(settings.general, "accentColor") || "#1c782b";
   const featured = solutions.filter((x) => bool(x.data, "featured"));
   const shownSolutions = (featured.length ? featured : solutions).slice(0, 3);
   const { intro, process, compliance, sustainability, people, careers, contact } = p;

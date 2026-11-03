@@ -79,6 +79,7 @@ export function Footer({ general, contact, social, footer }: { general: Bag; con
             <ul className="space-y-2.5">
               <Social href={s(social, "instagram")} label="Instagram" />
               <Social href={s(social, "linkedin")} label="LinkedIn" />
+              <Social href={s(social, "facebook")} label="Facebook" />
               <Social href={s(social, "youtube")} label="YouTube" />
               <Social href={s(social, "solides")} label="Portal Sólides" />
             </ul>

@@ -9,6 +9,7 @@ import { Provisional } from "@/components/site/Provisional";
 import { Faq } from "@/components/site/Faq";
 import { JobCard } from "@/components/careers/JobCard";
 import { ButtonLink } from "@/components/ui/Button";
+import { VideoEmbed } from "@/components/site/VideoEmbed";
 import { bool, getAllSettings, getItems, getPage, img, list, s } from "@/lib/content/queries";
 import { countOpenJobs, getFeaturedJobs } from "@/lib/careers/queries";
 import { pageMetadata } from "@/lib/seo/metadata";
@@ -28,7 +29,7 @@ export default async function CarreirasPage() {
     getItems("faqs"),
   ]);
   const marks = bool(settings.general, "showProvisionalMarkers");
-  const { hero, culture, development, areas, external, talent } = p;
+  const { hero, culture, development, areas, external, talent, video } = p;
   const approvedTestimonials = testimonials.filter((t) => bool(t.data, "consent"));
 
   return (
@@ -57,6 +58,23 @@ export default async function CarreirasPage() {
           </Reveal>
         </div>
       </section>
+
+      {s(video, "url") && (
+        <section className="container-x pb-24 md:pb-32" aria-labelledby="video-title">
+          <div className="grid gap-10 lg:grid-cols-12 lg:items-center">
+            <Reveal className="lg:col-span-4">
+              <p className="eyebrow">{s(video, "eyebrow")}</p>
+              <h2 id="video-title" className="mt-6 text-h2 font-semibold">
+                {s(video, "title")}
+              </h2>
+              {s(video, "body") && <p className="mt-5 text-lg text-steel">{s(video, "body")}</p>}
+            </Reveal>
+            <Reveal delay={0.1} className="lg:col-span-8">
+              <VideoEmbed url={s(video, "url")} title={s(video, "title") || "Vídeo institucional PETROLUB"} />
+            </Reveal>
+          </div>
+        </section>
+      )}
 
       {values.length > 0 && (
         <section className="container-x pb-24">
@@ -118,7 +136,13 @@ export default async function CarreirasPage() {
                 <Quote className="h-6 w-6 text-accent" aria-hidden="true" />
                 <blockquote className="mt-5 text-lg leading-relaxed">“{s(t.data, "quote")}”</blockquote>
                 <div className="mt-auto flex items-center gap-3 pt-6">
-                  {img(t.data, "photo").src && <ImageSlot image={img(t.data, "photo")} className="h-11 w-11 rounded-full" />}
+                  {img(t.data, "photo").src ? (
+                    <ImageSlot image={img(t.data, "photo")} className="h-14 w-14 shrink-0 rounded-full ring-2 ring-lime/60 ring-offset-2" />
+                  ) : (
+                    <span className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-accent-deep font-display text-lg font-semibold text-lime" aria-hidden="true">
+                      {t.title.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                    </span>
+                  )}
                   <p className="text-sm">
                     <span className="font-semibold">{t.title}</span>
                     <br />

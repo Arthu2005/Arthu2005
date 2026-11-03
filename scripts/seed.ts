@@ -64,7 +64,14 @@ for (const page of PAGES) {
   }
 }
 for (const st of SETTINGS) {
-  await db.insert(S.settings).values({ key: st.key, value: st.defaults }).onConflictDoNothing();
+  const ins = await db.insert(S.settings).values({ key: st.key, value: st.defaults }).onConflictDoNothing().returning({ key: S.settings.key });
+  if (!ins.length) {
+    // settings never edited in the admin follow the latest defaults in code
+    await db
+      .update(S.settings)
+      .set({ value: st.defaults, updatedAt: new Date() })
+      .where(and(eq(S.settings.key, st.key), isNull(S.settings.updatedBy), sql`${S.settings.value} <> ${JSON.stringify(st.defaults)}::jsonb`));
+  }
 }
 console.log(`✓ Seções: ${created} novas, ${refreshed} atualizadas (não editadas no painel)`);
 
@@ -76,6 +83,14 @@ const items: Item[] = [
   { collection: "metrics", slug: "colaboradores", title: "Colaboradores", data: { value: "490+", label: "Colaboradores na matriz e nas filiais", provisional: false, source: OFFICIAL } },
   { collection: "metrics", slug: "frota", title: "Frota", data: { value: "400", label: "Veículos de frota própria", provisional: false, source: OFFICIAL } },
   { collection: "metrics", slug: "litros-mes", title: "Volume", data: { value: "6 mi", label: "Litros de OLUC coletados e rerrefinados por mês", provisional: false, source: "Fonte: petrolub.com.br/quem-somos (“mais de 6 milhões de litros por mês”), consultado em 11/2026." } },
+
+  { collection: "metrics", slug: "cidades", title: "Cidades", data: { value: "1.200+", label: "Cidades brasileiras atendidas pela coleta", provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante." } },
+
+  // Testimonials (published by PETROLUB on its official careers portal)
+  { collection: "testimonials", slug: "andre-lopes", title: "André Lopes", data: { role: "Especialista em T.I.", quote: "Trabalhar na Petrolub é muito mais do que rotina de trabalho. Aqui encontrei um ambiente onde as pessoas se importam de verdade umas com as outras, onde dá pra propor ideias, aprender e crescer junto com a equipe. Como responsável pela área de TI, tenho liberdade para inovar e trazer soluções que fazem diferença para os diferentes setores, com confiança e abertura da liderança. O que mais valorizo é a proximidade entre as pessoas e o clima colaborativo e humano que a empresa mantém.", photo: { src: "/images/team/andre.webp", alt: "André Lopes, Especialista em T.I. da PETROLUB" }, consent: true, provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante." } },
+  { collection: "testimonials", slug: "josiane-lino", title: "Josiane Lino", data: { role: "Analista de R.H.", quote: "Tenho orgulho de fazer parte da PETROLUB, uma empresa sólida, com 60 anos de mercado, que oferece segurança, estabilidade e oportunidades de aprendizado. Atuando no RH, com foco em Recrutamento e Seleção, encontro desafios diários que ampliam minha experiência e impulsionam meu desenvolvimento. É gratificante conectar talentos a uma empresa que constrói sua história valorizando resultados e buscando excelência.", photo: { src: "/images/team/josiane.webp", alt: "Josiane Lino, Analista de R.H. da PETROLUB" }, consent: true, provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante." } },
+  { collection: "testimonials", slug: "maicon-freitas", title: "Maicon Freitas", data: { role: "Auxiliar Administrativo — Departamento Fiscal", quote: "Iniciei minha carreira na PETROLUB como aprendiz, experiência que me permitiu aprender na prática com profissionais que contribuíram para minha formação. Depois fui efetivado e passei a atuar na área Fiscal, onde sigo ampliando conhecimentos e desenvolvendo novas habilidades. O que mais valorizo é ter espaço para contribuir com ideias e seguir construindo minha trajetória profissional dentro da empresa.", photo: { src: "", alt: "" }, consent: true, provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante. Foto indisponível no portal (arquivo com nome incompleto)." } },
+  { collection: "testimonials", slug: "fagner-batista", title: "Fagner Batista", data: { role: "Supervisor de Produção", quote: "Fui formado na própria Petrolub, o que me deu a chance de crescer junto com a empresa e entender o processo de dentro para fora. Hoje, como Supervisor de Produção, meu papel é garantir que cada etapa aconteça com segurança, qualidade e eficiência, próximo da operação, buscando melhoria contínua ao lado da equipe. Acredito que liderança de verdade é dar direção clara e confiar no time.", photo: { src: "/images/team/fagner.webp", alt: "Fagner Batista, Supervisor de Produção da PETROLUB" }, consent: true, provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante." } },
 
   // Solutions
   {

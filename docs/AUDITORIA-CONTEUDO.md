@@ -11,6 +11,17 @@ O acesso direto às páginas estava bloqueado pela rede do ambiente; os fatos fo
 - vagas.solides.com.br (anúncios de vagas da PETROLUB)
 - Documentos públicos do órgão ambiental de MG (licenciamento da unidade de Sete Lagoas)
 
+## Portal de carreiras oficial (fonte atual)
+
+Do portal público da PETROLUB na Sólides (petrolub.vagas.solides.com.br, 11/2026), com autorização de uso informada pelo contratante, vieram:
+- **Logotipo oficial**, nas versões colorida e branca (a branca enviada pelo contratante): `public/brand/`;
+- **cor da marca** `#1c782b`, que passou a ser o verde de botões e destaques;
+- **banners institucionais** com gotas de óleo verde: `public/images/brand-*.webp`;
+- **texto institucional**: atuação desde 1966, preservação dos recursos naturais, **coleta em mais de 1.200 cidades**, retorno do óleo básico às formuladoras, economia circular e ambiente de trabalho saudável, transparente e seguro;
+- **slogan**: “Cada gota de óleo conta. E cada talento também.”;
+- **depoimentos** de André Lopes, Josiane Lino, Maicon Freitas e Fagner Batista, com fotos (a do Maicon estava indisponível no portal);
+- **vídeo institucional** no YouTube e links de Facebook, Instagram e LinkedIn.
+
 ## Descoberta importante de posicionamento
 
 A PETROLUB atua principalmente na **coleta e no rerrefino de óleo lubrificante usado ou contaminado (OLUC)** e produz **óleo básico rerrefinado**. Por isso, “Soluções” apresenta serviços (coleta, rerrefino, documentação ambiental) e o produto (óleo básico Grupo I), e o subtítulo do hero foi adaptado a esse posicionamento. A frase “Movemos a indústria. Protegemos o futuro.” é uma **proposta criativa** a validar pela comunicação.
@@ -39,12 +50,11 @@ A PETROLUB atua principalmente na **coleta e no rerrefino de óleo lubrificante 
 - Cultura organizacional, desenvolvimento profissional, áreas de atuação e compromissos.
 - Cada licença/autorização: anexar número, validade e documento oficial.
 - Política de privacidade (minuta técnica).
-- Logotipo: o site usa um logotipo tipográfico provisório até o envio do arquivo oficial.
 - Cores: verdes definidos a partir da identidade do Instagram oficial descrita pelo contratante; confirmar os códigos exatos no manual de marca (o verde vibrante é editável no painel).
 
 ## Não publicado por falta de comprovação
 
-Certificações ISO, prêmios, indicadores ambientais adicionais, características técnicas/propriedades do óleo básico, benefícios, depoimentos e fotos reais — todos têm campos prontos no painel. Números de terceiros (ex.: faturamento estimado, “1.200 cidades”) foram descartados.
+Certificações ISO, prêmios, indicadores ambientais adicionais, características técnicas/propriedades do óleo básico, benefícios, depoimentos e fotos reais — todos têm campos prontos no painel. Números de terceiros (ex.: faturamento estimado) foram descartados. “1.200 cidades” passou a ser publicado após aparecer no portal oficial.
 
 ## Imagens
 

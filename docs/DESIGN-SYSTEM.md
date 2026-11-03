@@ -8,7 +8,7 @@ Conceito: **“A força do petróleo em movimento.”** Minimalismo editorial so
 | --- | --- | --- |
 | `paper` | `#ffffff` | Base predominante |
 | `paper-2` | `#f1f5f2` | Seções alternadas (branco esverdeado frio) |
-| `accent` | `#0a8539` | **Verde vibrante** — botões, links, elementos interativos (texto branco ≥ 4,5:1). Editável em *Configurações › Identidade* |
+| `accent` | `#1c782b` | **Verde oficial da marca**: botões, links e elementos interativos (texto branco ≥ 4,5:1). Editável em *Configurações › Identidade* |
 | `accent-ink` | derivado do `accent` | Texto verde sobre branco |
 | `accent-deep` | `#0a3d22` | **Verde escuro institucional** — identidade, seleções, destaques, barra de avisos |
 | `forest` | `#062b17` | Superfícies escuras (indicadores, rodapé, menu mobile, painel) com brilho limão sutil |
@@ -16,6 +16,8 @@ Conceito: **“A força do petróleo em movimento.”** Minimalismo editorial so
 | `ink` / `ink-2` | `#0b0f0d` / `#26302a` | Títulos e texto |
 | `graphite`, `steel`, `steel-2`, `line` | grafites e cinzas com leve subtom verde | Texto secundário, divisórias, contrastes |
 | `signal` | `#c0352b` | Somente erros de formulário |
+
+Logotipo oficial em `public/brand/`, colorido para fundos claros e branco para fundos escuros; o ícone do navegador é o símbolo circular.
 
 Gradiente institucional (`brand-deep`): `#0a3d22 → #0b5a30 → #0a8539` com luz radial limão no canto. Linhas do hero: gradiente verde escuro → vibrante → limão. Azul, dourado, amarelo e laranja não são usados.
 

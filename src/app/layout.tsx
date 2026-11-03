@@ -27,7 +27,6 @@ export async function generateMetadata(): Promise<Metadata> {
     description: s(seo, "defaultDescription"),
     applicationName: "PETROLUB",
     formatDetection: { telephone: false },
-    icons: { icon: "/icon.svg" },
   };
 }
 
@@ -46,7 +45,7 @@ function shade(hex: string, f: number) {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { general } = await getAllSettings();
-  const accent = /^#[0-9a-f]{6}$/i.test(s(general, "accentColor")) ? s(general, "accentColor") : "#0a8539";
+  const accent = /^#[0-9a-f]{6}$/i.test(s(general, "accentColor")) ? s(general, "accentColor") : "#1c782b";
   return (
     <html lang="pt-BR" className={`${inter.variable} ${manrope.variable}`} style={{ ["--brand-accent" as string]: accent, ["--brand-accent-ink" as string]: shade(accent, 0.62) }}>
       <body>{children}</body>
