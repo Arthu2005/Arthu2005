@@ -515,6 +515,36 @@ export const PAGES: PageDef[] = [
         },
       },
       {
+        key: "gallery",
+        label: "Galeria da equipe",
+        description: "Fotos reais de colaboradores. Use apenas imagens com autorização de uso. Galeria vazia não é exibida.",
+        fields: [
+          ...heading,
+          {
+            name: "items",
+            label: "Fotos",
+            type: "repeater",
+            itemLabel: "Foto",
+            fields: [
+              { name: "image", label: "Foto", type: "image" },
+              { name: "caption", label: "Legenda", type: "text", max: 80 },
+            ],
+          },
+        ],
+        defaults: {
+          eyebrow: "Gente da PETROLUB",
+          title: "Do atendimento ao pátio industrial.",
+          items: [
+            { image: { src: "/images/equipe/atendimento-coleta.webp", alt: "Colaboradora da PETROLUB com headset, sorrindo na estação de atendimento" }, caption: "Atendimento" },
+            { image: { src: "/images/equipe/tecnico-patio.webp", alt: "Colaborador da PETROLUB de capacete, óculos, protetor auricular e colete refletivo no pátio da unidade" }, caption: "Pátio industrial" },
+            { image: { src: "/images/equipe/operador-veterano.webp", alt: "Colaborador da PETROLUB de capacete e óculos de proteção, sorrindo na unidade industrial" }, caption: "Unidade industrial" },
+            { image: { src: "/images/equipe/oleo-usado-e-rerrefinado.webp", alt: "Colaboradora da PETROLUB segurando duas provetas: óleo lubrificante usado, escuro, e óleo rerrefinado, dourado" }, caption: "Qualidade" },
+          ],
+          provisional: false,
+          source: "Fotos enviadas pela PETROLUB (uso autorizado das imagens do Facebook e do Instagram).",
+        },
+      },
+      {
         key: "development",
         label: "Desenvolvimento profissional",
         fields: [...heading, { name: "body", label: "Texto", type: "markdown" }],

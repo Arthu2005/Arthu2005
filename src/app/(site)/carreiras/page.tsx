@@ -10,7 +10,7 @@ import { Faq } from "@/components/site/Faq";
 import { JobCard } from "@/components/careers/JobCard";
 import { ButtonLink } from "@/components/ui/Button";
 import { VideoEmbed } from "@/components/site/VideoEmbed";
-import { bool, getAllSettings, getItems, getPage, img, list, s } from "@/lib/content/queries";
+import { bool, getAllSettings, getItems, getPage, img, list, rep, s } from "@/lib/content/queries";
 import { countOpenJobs, getFeaturedJobs } from "@/lib/careers/queries";
 import { pageMetadata } from "@/lib/seo/metadata";
 
@@ -29,7 +29,8 @@ export default async function CarreirasPage() {
     getItems("faqs"),
   ]);
   const marks = bool(settings.general, "showProvisionalMarkers");
-  const { hero, culture, development, areas, external, talent, video } = p;
+  const { hero, culture, gallery, development, areas, external, talent, video } = p;
+  const galleryItems = rep(gallery, "items").filter((g) => img(g, "image").src);
   const approvedTestimonials = testimonials.filter((t) => bool(t.data, "consent"));
 
   return (
@@ -58,6 +59,22 @@ export default async function CarreirasPage() {
           </Reveal>
         </div>
       </section>
+
+      {galleryItems.length > 0 && (
+        <section className="container-x pb-24 md:pb-32">
+          <SectionHeading eyebrow={s(gallery, "eyebrow")} title={s(gallery, "title")} />
+          <ul className="mt-12 grid grid-cols-2 gap-4 md:gap-5 lg:grid-cols-4">
+            {galleryItems.map((g, i) => (
+              <Reveal as="li" key={i} delay={i * 0.06}>
+                <figure>
+                  <ImageSlot image={img(g, "image")} className="aspect-[4/5] rounded-[var(--radius-card)]" />
+                  {s(g, "caption") && <figcaption className="mt-3 text-sm font-medium text-steel">{s(g, "caption")}</figcaption>}
+                </figure>
+              </Reveal>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {s(video, "url") && (
         <section className="container-x pb-24 md:pb-32" aria-labelledby="video-title">
