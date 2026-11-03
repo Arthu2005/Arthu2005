@@ -22,14 +22,14 @@ function detect(): Mode {
   const cores = nav.hardwareConcurrency ?? 4;
   const mem = nav.deviceMemory ?? 4;
   const small = window.matchMedia("(max-width: 767px)").matches;
-  if (cores <= 2 || mem <= 2) return "static";
+  // weak devices still get the live scene, at the lighter quality tier
   if (small || cores <= 4 || mem <= 4) return "webgl-medium";
   return "webgl-high";
 }
 
 /**
- * Chooses how to present the oil: real-time WebGL (two quality tiers) or a static pre-rendered poster
- * for low-power devices, data-saver and browsers without WebGL. Reduced-motion users get a still frame.
+ * Chooses how to present the oil: real-time WebGL (two quality tiers), or a static pre-rendered poster only
+ * when WebGL is unavailable or data-saver is on. Reduced-motion users get a slower, gentler animation.
  */
 export function HeroStage({ accent }: { accent: string }) {
   const reduced = useReducedMotion() ?? false;

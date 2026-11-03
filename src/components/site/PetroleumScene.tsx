@@ -9,14 +9,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 /**
- * "A força do petróleo em movimento"
+ * "A força do petróleo em movimento" — a swirling splash of crude oil.
  *
- * One continuous drop of crude oil, deformed on the GPU:
- *  - teardrop silhouette with slow, viscous surface currents (layered simplex noise)
- *  - a drip cycle: the bottom sags, forms a neck, a droplet detaches and falls (stretching with speed)
- *    while the body recoils and wobbles
- *  - the surface reaches toward the cursor; without a cursor it follows a slow virtual one (always alive)
- * Material: black clear-coated PBR + studio Lightformers (no HDR download) with green/lime strips
+ * The splash is a thick liquid ribbon swept along an animated spiral (closed elliptical cross-section),
+ * built entirely in the vertex shader:
+ *  - thin tail → wide sheet → curling crown at the head
+ *  - liquid flowing along the ribbon (noise advected along the stream), edges breaking into fingers
+ *  - the whole stream slowly twists, breathes and turns by itself (no interaction needed)
+ *  - droplets keep detaching from the edges and flying off under gravity (instanced)
+ *  - the surface reaches gently toward the cursor when there is one
+ * Material: black clear-coated PBR in a Lightformer studio (no HDR download) with subtle green/lime strips
  * and a lime fresnel rim for the PETROLUB identity.
  */
 
@@ -24,11 +26,6 @@ type Quality = "high" | "medium";
 
 const LIME = new THREE.Color("#a6e22e");
 const DEEP = "#0a3d22";
-const CYCLE = 7.5; // seconds per drip
-
-/* ------------------------------------------------------------------ */
-/* GLSL                                                                 */
-/* ------------------------------------------------------------------ */
 
 // Ashima Arts 3D simplex noise (MIT)
 const NOISE = /* glsl */ `
@@ -57,241 +54,237 @@ float snoise(vec3 v){
 }
 `;
 
-const DEFORM = /* glsl */ `
+/** Centerline of the stream (JS twin of the GLSL `curve`, used to emit droplets from the sheet). */
+function curveJS(u: number, t: number, out = new THREE.Vector3()) {
+  const a = -1.15 - u * 4.35 + Math.sin(t * 0.33) * 0.16 + Math.sin(t * 0.21 + u * 3.0) * 0.08;
+  const R = 0.55 + 0.62 * u + Math.sin(t * 0.4 + u * 2.0) * 0.04;
+  return out.set(Math.cos(a) * R * 1.25, Math.sin(a) * R * 0.92 + (u - 0.45) * 0.55, Math.sin(u * Math.PI + t * 0.25) * 0.42 - 0.1);
+}
+const widthJS = (u: number) => (0.02 + 0.38 * THREE.MathUtils.smoothstep(u, 0, 0.72) + 0.14 * THREE.MathUtils.smoothstep(u, 0.78, 0.9)) * (1 - THREE.MathUtils.smoothstep(u, 0.93, 1));
+
+const STREAM = /* glsl */ `
 uniform float uTime;
-uniform vec3  uPointer;     // direction (object space) the surface reaches for
+uniform vec3  uPointer;
 uniform float uPointerAmt;
-uniform float uDrip;        // 0..1 neck/sag growth before a drop detaches
-uniform float uRecoil;      // wobble energy after detaching / on scroll
-uniform float uShape;       // 1 = main teardrop body, 0 = free droplet
-uniform float uAmp;         // overall surface turbulence
 
-vec3 deform(vec3 p){
-  vec3 n = normalize(p);
-  float y = n.y;
-  vec3 q = n;
+vec3 curve(float u, float t){
+  float a = -1.15 - u * 4.35 + sin(t * 0.33) * 0.16 + sin(t * 0.21 + u * 3.0) * 0.08;
+  float R = 0.55 + 0.62 * u + sin(t * 0.4 + u * 2.0) * 0.04;
+  return vec3(cos(a) * R * 1.25, sin(a) * R * 0.92 + (u - 0.45) * 0.55, sin(u * 3.14159265 + t * 0.25) * 0.42 - 0.1);
+}
 
-  // teardrop: pointed, slightly leaning top
-  float top = smoothstep(-0.35, 1.0, y) * uShape;
-  q.xz *= 1.0 - pow(top, 3.2) * 0.6;
-  q.y  *= 1.0 + pow(top, 2.2) * 0.34;
-  q.x  += pow(top, 3.0) * 0.05;
+// half-width of the sheet: thin tail, wide body, curling crown, closed head
+float widthAt(float u, float t){
+  float w = 0.02 + 0.38 * smoothstep(0.0, 0.72, u);
+  w += 0.14 * smoothstep(0.78, 0.9, u);
+  w *= 1.0 - smoothstep(0.93, 1.0, u);
+  w *= 1.0 + 0.12 * sin(u * 9.0 - t * 1.4);   // pulses travelling along the stream
+  return w;
+}
 
-  // gravity: heavy bottom, neck and hanging drop while uDrip grows
-  float bottom = smoothstep(0.35, 1.0, -y) * uShape;
-  float tip = smoothstep(0.82, 1.0, -y) * uShape;
-  q.y  -= bottom * 0.10 + tip * uDrip * 0.62;
-  q.xz *= 1.0 - smoothstep(0.6, 0.9, -y) * uShape * uDrip * 0.38 + tip * uDrip * 0.18;
-
-  // viscous currents (slow, layered)
+vec3 streamPos(float u, float th){
   float t = uTime;
-  float w = snoise(n * 0.9 + vec3(0.0, t * 0.14, t * 0.05)) * 0.055
-          + snoise(n * 1.9 + vec3(t * 0.18, -t * 0.1, 0.0)) * 0.018
-          + snoise(n * 3.6 - vec3(0.0, t * 0.26, t * 0.16)) * 0.004;
+  vec3 c  = curve(u, t);
+  vec3 c2 = curve(u + 0.004, t);
+  vec3 T  = normalize(c2 - c + vec3(1e-5));
+  vec3 N  = normalize(cross(T, vec3(0.0, 0.0, 1.0)));   // broad face of the sheet looks at the camera
+  vec3 B  = normalize(cross(N, T));
+
+  float w = widthAt(u, t);
+  float side = cos(th);
+  // edges break up into liquid fingers advected along the flow
+  float edge = smoothstep(0.55, 1.0, abs(side));
+  float fingers = snoise(vec3(u * 22.0 - t * 1.1, side * 2.0, t * 0.3));
+  w *= 1.0 + edge * (0.22 * fingers + 0.08);
+
+  float thick = 0.035 + w * 0.16;
+  // the sheet cups across its width, more at the crown
+  float cup = (0.25 + 0.6 * smoothstep(0.7, 0.95, u)) * w;
+  vec3 p = c + N * side * w + B * (sin(th) * thick + side * side * cup);
+
+  // flowing surface ripples
+  vec3 nrm = normalize(N * side + B * sin(th) + vec3(1e-5));
+  float flow = snoise(vec3(u * 7.0 - t * 0.9, th * 0.7, t * 0.25)) * 0.022
+             + snoise(vec3(u * 16.0 - t * 1.6, th, 0.0)) * 0.008;
+  p += nrm * flow * (0.4 + w);
 
   // reach toward the pointer
-  float facing = max(dot(n, uPointer), 0.0);
-  w += pow(facing, 6.0) * uPointerAmt * 0.2;
-
-  // recoil jiggle travelling up the body
-  w += sin(y * 7.0 - t * 9.0) * uRecoil * 0.035 * (0.5 + 0.5 * (1.0 - abs(y)));
-
-  return q * (1.0 + w * uAmp);
+  float facing = max(dot(normalize(p), uPointer), 0.0);
+  p += nrm * pow(facing, 8.0) * uPointerAmt * 0.12;
+  return p;
 }
 `;
 
-function makeOilMaterial(shape: number, amp: number) {
+function makeStreamMaterial() {
   const uniforms = {
     uTime: { value: 0 },
     uPointer: { value: new THREE.Vector3(0, 0, 1) },
     uPointerAmt: { value: 0 },
-    uDrip: { value: 0 },
-    uRecoil: { value: 0 },
-    uShape: { value: shape },
-    uAmp: { value: amp },
     uRim: { value: LIME.clone() },
-    uRimAmt: { value: 0.09 },
+    uRimAmt: { value: 0.1 },
   };
   const mat = new THREE.MeshPhysicalMaterial({
     color: new THREE.Color("#010201"),
-    roughness: 0.035,
-    metalness: 0.25,
+    roughness: 0.06,
+    metalness: 0.2,
     clearcoat: 1,
-    clearcoatRoughness: 0.02,
-    reflectivity: 1,
-    envMapIntensity: 1.75,
-    specularIntensity: 1,
+    clearcoatRoughness: 0.03,
+    envMapIntensity: 1.7,
+    side: THREE.DoubleSide,
   });
   mat.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader
-      .replace("#include <common>", `#include <common>\n${NOISE}\n${DEFORM}`)
+      .replace("#include <common>", `#include <common>\n${NOISE}\n${STREAM}`)
       .replace(
         "#include <beginnormal_vertex>",
         /* glsl */ `
-        vec3 dPos = deform(position);
-        vec3 nrm = normalize(position);
-        vec3 tng = normalize(cross(nrm, abs(nrm.y) < 0.99 ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0)));
-        vec3 btg = normalize(cross(nrm, tng));
-        float eps = 0.0025;
-        vec3 dA = deform(position + tng * eps);
-        vec3 dB = deform(position + btg * eps);
-        vec3 objectNormal = normalize(cross(dA - dPos, dB - dPos));
-        if (dot(objectNormal, dPos) < 0.0) objectNormal = -objectNormal;
+        float su = uv.x;
+        float sth = uv.y * 6.2831853;
+        vec3 sPos = streamPos(su, sth);
+        vec3 sdU = streamPos(min(su + 0.0025, 1.0), sth) - streamPos(max(su - 0.0025, 0.0), sth);
+        vec3 sdT = streamPos(su, sth + 0.02) - streamPos(su, sth - 0.02);
+        vec3 objectNormal = normalize(cross(sdU, sdT) + vec3(1e-6));
         #ifdef USE_TANGENT
           vec3 objectTangent = vec3(tangent.xyz);
         #endif
         `,
       )
-      .replace("#include <begin_vertex>", "vec3 transformed = dPos;");
+      .replace("#include <begin_vertex>", "vec3 transformed = sPos;");
     shader.fragmentShader = shader.fragmentShader
       .replace("#include <common>", "#include <common>\nuniform vec3 uRim;\nuniform float uRimAmt;")
       .replace(
         "#include <emissivemap_fragment>",
         /* glsl */ `#include <emissivemap_fragment>
-        float fres = pow(1.0 - saturate(dot(normalize(normal), normalize(vViewPosition))), 5.0);
+        float fres = pow(1.0 - saturate(abs(dot(normalize(normal), normalize(vViewPosition)))), 4.5);
         totalEmissiveRadiance += uRim * fres * uRimAmt;`,
       );
   };
-  mat.customProgramCacheKey = () => `petrolub-oil-${shape}`;
+  mat.customProgramCacheKey = () => "petrolub-oil-stream";
   return { mat, uniforms };
 }
 
-/* ------------------------------------------------------------------ */
-/* Scene                                                                */
-/* ------------------------------------------------------------------ */
+type Droplet = { pos: THREE.Vector3; vel: THREE.Vector3; life: number; max: number; size: number };
 
-type DropState = { active: boolean; y: number; v: number; x: number; born: number };
+const UP = new THREE.Vector3(0, 1, 0);
+const Z = new THREE.Vector3(0, 0, 1);
 
-function OilDrop({ quality, animate }: { quality: Quality; animate: boolean }) {
-  const body = useRef<THREE.Mesh>(null);
-  const drops = useRef<(THREE.Mesh | null)[]>([]);
+function Splash({ quality, speed }: { quality: Quality; speed: number }) {
   const { pointer, size } = useThree();
+  const stream = useMemo(() => makeStreamMaterial(), []);
+  const dropMat = useMemo(
+    () => new THREE.MeshPhysicalMaterial({ color: "#010201", roughness: 0.05, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.7 }),
+    [],
+  );
+  // x = position along the stream, y = angle around the cross-section
+  const geo = useMemo(() => new THREE.PlaneGeometry(1, 1, quality === "high" ? 420 : 220, quality === "high" ? 48 : 28), [quality]);
+  const dropGeo = useMemo(() => new THREE.IcosahedronGeometry(1, 3), []);
+  const COUNT = quality === "high" ? 34 : 18;
+  const drops = useRef<THREE.InstancedMesh>(null);
+  const sim = useRef({ clock: 0, idle: 10, last: new THREE.Vector2(9, 9), dir: new THREE.Vector3(0, 0, 1), reach: 0, particles: [] as Droplet[] });
+  const tmp = useMemo(
+    () => ({ m: new THREE.Matrix4(), q: new THREE.Quaternion(), s: new THREE.Vector3(), a: new THREE.Vector3(), b: new THREE.Vector3(), T: new THREE.Vector3(), N: new THREE.Vector3(), v: new THREE.Vector3(), target: new THREE.Vector3() }),
+    [],
+  );
 
-  const main = useMemo(() => makeOilMaterial(1, 1), []);
-  const small = useMemo(() => makeOilMaterial(0, 0.6), []);
-  const geo = useMemo(() => new THREE.IcosahedronGeometry(1, quality === "high" ? 96 : 48), [quality]);
-  const dropGeo = useMemo(() => new THREE.IcosahedronGeometry(1, quality === "high" ? 24 : 14), [quality]);
+  useEffect(
+    () => () => {
+      geo.dispose();
+      dropGeo.dispose();
+      stream.mat.dispose();
+      dropMat.dispose();
+    },
+    [geo, dropGeo, stream, dropMat],
+  );
 
-  const state = useRef({
-    lastPointer: new THREE.Vector2(9, 9),
-    idle: 10,
-    reach: 0,
-    recoil: 0,
-    lastCycle: -1,
-    scrollY: 0,
-    dir: new THREE.Vector3(0, 0, 1),
-    drops: [0, 1].map(() => ({ active: false, y: 0, v: 0, x: 0, born: 0 }) as DropState),
-  });
+  const spawn = (d: Droplet, t: number, initial = false) => {
+    const u = 0.25 + Math.random() * 0.72;
+    const c = curveJS(u, t, tmp.a);
+    const c2 = curveJS(Math.min(u + 0.01, 1), t, tmp.b);
+    const T = tmp.T.copy(c2).sub(c).normalize();
+    const N = tmp.N.crossVectors(T, Z).normalize();
+    const side = Math.random() < 0.5 ? -1 : 1;
+    d.pos.copy(c).addScaledVector(N, side * widthJS(u) * 1.1);
+    d.vel
+      .copy(T)
+      .multiplyScalar(0.5 + Math.random() * 0.6)
+      .addScaledVector(N, side * (0.35 + Math.random() * 0.6));
+    d.vel.x += (Math.random() - 0.5) * 0.2;
+    d.vel.y += 0.15 + Math.random() * 0.35;
+    d.vel.z += (Math.random() - 0.5) * 0.3;
+    d.max = 1.4 + Math.random() * 1.8;
+    d.life = initial ? Math.random() * d.max : 0;
+    d.size = 0.012 + Math.pow(Math.random(), 2.2) * 0.05;
+  };
 
-  useEffect(() => () => {
-    geo.dispose();
-    dropGeo.dispose();
-    main.mat.dispose();
-    small.mat.dispose();
-  }, [geo, dropGeo, main, small]);
+  useFrame((_, delta) => {
+    const s = sim.current;
+    const dt = Math.min(delta, 0.05) * speed;
+    s.clock += dt;
+    const t = s.clock;
 
-  const SCALE = size.width < 768 ? 0.72 : 0.8;
-  const TIP_Y = -(1.1 + 0.62) * SCALE + 0.15;
+    // reach toward the cursor while it moves; otherwise a slow virtual one keeps the surface alive
+    const moved = s.last.distanceToSquared(pointer) > 1e-6;
+    s.last.copy(pointer);
+    s.idle = moved ? 0 : s.idle + delta;
+    if (s.idle > 2.5) tmp.target.set(Math.sin(t * 0.4) * 0.8, Math.cos(t * 0.27) * 0.6, 0.8);
+    else tmp.target.set(pointer.x, pointer.y, 0.7);
+    s.dir.lerp(tmp.target.normalize(), 0.05).normalize();
+    s.reach = THREE.MathUtils.damp(s.reach, s.idle > 2.5 ? 0.5 : 1, 3, delta);
 
-  useFrame((frame, delta) => {
-    const s = state.current;
-    const dt = Math.min(delta, 0.05);
-    const t = animate ? frame.clock.elapsedTime : 2.4;
+    stream.uniforms.uTime.value = t;
+    stream.uniforms.uPointer.value.copy(s.dir);
+    stream.uniforms.uPointerAmt.value = s.reach;
 
-    // pointer activity → reach; when idle, a slow virtual pointer keeps the surface alive
-    const moved = s.lastPointer.distanceToSquared(pointer) > 1e-6;
-    s.lastPointer.copy(pointer);
-    s.idle = moved ? 0 : s.idle + dt;
-    const virtual = new THREE.Vector3(Math.sin(t * 0.37) * 0.9, Math.cos(t * 0.23) * 0.6, 0.75);
-    const real = new THREE.Vector3(pointer.x * 1.2, pointer.y * 1.2, 0.7);
-    const target = (s.idle > 2.5 ? virtual : real).normalize();
-    // convert into the body's object space (it rotates slowly)
-    if (body.current) target.applyQuaternion(body.current.quaternion.clone().invert());
-    s.dir.lerp(target, 0.06).normalize();
-    s.reach = THREE.MathUtils.damp(s.reach, animate ? (s.idle > 2.5 ? 0.55 : 1) : 0.4, 3, dt);
-
-    // scroll jolts make it wobble
-    const sy = typeof window !== "undefined" ? window.scrollY : 0;
-    s.recoil += Math.min(Math.abs(sy - s.scrollY) / 400, 0.4);
-    s.scrollY = sy;
-
-    // drip cycle
-    let drip = 0;
-    if (animate) {
-      const cyc = Math.floor(t / CYCLE);
-      const ph = (t % CYCLE) / CYCLE;
-      drip = ph < 0.78 ? Math.pow(ph / 0.78, 2.4) : Math.max(0, 1 - (ph - 0.78) * 14) * 0.9;
-      if (ph >= 0.78 && s.lastCycle !== cyc) {
-        s.lastCycle = cyc;
-        s.recoil = Math.min(s.recoil + 1, 1.4);
-        const d = s.drops.find((x) => !x.active) ?? s.drops[0]!;
-        Object.assign(d, { active: true, y: TIP_Y - 0.05, v: 0.4, x: 0, born: t });
-      }
-    } else {
-      drip = 0.35;
+    const mesh = drops.current;
+    if (!mesh) return;
+    if (s.particles.length !== COUNT) {
+      s.particles = Array.from({ length: COUNT }, () => {
+        const d: Droplet = { pos: new THREE.Vector3(), vel: new THREE.Vector3(), life: 0, max: 1, size: 0.02 };
+        spawn(d, t, true);
+        return d;
+      });
     }
-    s.recoil = THREE.MathUtils.damp(s.recoil, 0, 1.6, dt);
-
-    for (const u of [main.uniforms, small.uniforms]) u.uTime.value = t;
-    main.uniforms.uPointer.value.copy(s.dir);
-    main.uniforms.uPointerAmt.value = s.reach;
-    main.uniforms.uDrip.value = drip;
-    main.uniforms.uRecoil.value = s.recoil;
-
-    if (body.current) {
-      body.current.rotation.y = animate ? t * 0.08 : 0.4;
-    }
-
-    // falling droplets (stretched by velocity)
-    s.drops.forEach((d, i) => {
-      const m = drops.current[i];
-      if (!m) return;
-      if (!d.active) {
-        m.visible = false;
-        return;
-      }
-      d.v += 9.8 * 0.55 * dt;
-      d.y -= d.v * dt;
-      const age = t - d.born;
-      const r = 0.13 * SCALE * Math.min(1, 0.6 + age * 3);
-      m.visible = true;
-      m.position.set(d.x, d.y, 0.05);
-      m.scale.set(r / (1 + d.v * 0.05), r * (1 + d.v * 0.18), r / (1 + d.v * 0.05));
-      if (d.y < -6) d.active = false;
+    s.particles.forEach((d, i) => {
+      d.life += dt;
+      if (d.life > d.max) spawn(d, t);
+      d.vel.y -= 1.6 * dt;
+      d.vel.multiplyScalar(1 - 0.25 * dt);
+      d.pos.addScaledVector(d.vel, dt);
+      const k = d.life / d.max;
+      const grow = Math.min(1, d.life * 6) * (1 - Math.pow(k, 4));
+      const stretch = 1 + Math.min(d.vel.length() * 0.35, 0.9);
+      tmp.q.setFromUnitVectors(UP, tmp.v.copy(d.vel).normalize());
+      tmp.s.set(d.size * grow, d.size * grow * stretch, d.size * grow);
+      tmp.m.compose(d.pos, tmp.q, tmp.s);
+      mesh.setMatrixAt(i, tmp.m);
     });
+    mesh.instanceMatrix.needsUpdate = true;
   });
 
+  const scale = size.width < 768 ? 0.58 : 0.66;
   return (
-    <group position={[0, 0.15, 0]}>
-      <mesh ref={body} geometry={geo} material={main.mat} scale={SCALE} />
-      {[0, 1].map((i) => (
-        <mesh
-          key={i}
-          ref={(el) => {
-            drops.current[i] = el;
-          }}
-          geometry={dropGeo}
-          material={small.mat}
-          visible={false}
-        />
-      ))}
+    <group scale={scale} position={[0.05, -0.05, 0]} rotation={[0.08, -0.15, -0.12]}>
+      <mesh geometry={geo} material={stream.mat} frustumCulled={false} />
+      <instancedMesh ref={drops} args={[dropGeo, dropMat, COUNT]} frustumCulled={false} />
     </group>
   );
 }
 
-function Rig({ children, animate }: { children: React.ReactNode; animate: boolean }) {
+function Rig({ children, speed }: { children: React.ReactNode; speed: number }) {
   const group = useRef<THREE.Group>(null);
   const { pointer } = useThree();
-  useFrame((state, delta) => {
+  const clock = useRef(0);
+  useFrame((_, delta) => {
     const g = group.current;
     if (!g) return;
-    const t = state.clock.elapsedTime;
-    g.rotation.y = THREE.MathUtils.damp(g.rotation.y, pointer.x * 0.25, 2, delta);
-    g.rotation.x = THREE.MathUtils.damp(g.rotation.x, -pointer.y * 0.12, 2, delta);
-    g.position.y = THREE.MathUtils.damp(g.position.y, animate ? Math.sin(t * 0.5) * 0.05 : 0, 2, delta);
-    const scroll = typeof window !== "undefined" ? Math.min(window.scrollY / window.innerHeight, 1) : 0;
-    g.position.y -= scroll * 0.02;
+    clock.current += delta * speed;
+    const t = clock.current;
+    // continuous, automatic motion: slow turn and float, plus light parallax with the pointer
+    g.rotation.y = THREE.MathUtils.damp(g.rotation.y, Math.sin(t * 0.18) * 0.35 + pointer.x * 0.2, 2, delta);
+    g.rotation.x = THREE.MathUtils.damp(g.rotation.x, Math.cos(t * 0.15) * 0.12 - pointer.y * 0.1, 2, delta);
+    g.rotation.z = Math.sin(t * 0.11) * 0.06;
+    g.position.y = Math.sin(t * 0.45) * 0.06;
   });
   return <group ref={group}>{children}</group>;
 }
@@ -304,14 +297,10 @@ function Studio({ accent }: { accent: string }) {
   return (
     <Environment resolution={512} frames={1}>
       <color attach="background" args={["#020503"]} />
-      {/* broad soft key from above: the big liquid highlight */}
       <Lightformer form="rect" intensity={2.4} position={[0, 5, 1.5]} rotation-x={Math.PI / 2} scale={[10, 2.2, 1]} />
-      {/* window-like key in front-left: crisp curved reflection */}
-      <Lightformer form="rect" intensity={2.4} position={[-3.5, 1.8, 4]} rotation-y={-0.6} scale={[1.4, 3, 1]} />
-      {/* thin strips: viscous edge lines */}
+      <Lightformer form="rect" intensity={2.6} position={[-3.5, 1.8, 4]} rotation-y={-0.6} scale={[1.4, 3, 1]} />
       <Lightformer form="rect" color="#effee0" intensity={2.2} position={[-5, 0.4, 0]} rotation-y={Math.PI / 2} scale={[24, 0.16, 1]} />
       <Lightformer form="rect" color={LIME.getStyle()} intensity={1.2} position={[5, -0.5, 0]} rotation-y={-Math.PI / 2} scale={[24, 0.12, 1]} />
-      {/* vibrant green bounce from below + deep green fill */}
       <Lightformer form="rect" color={accent} intensity={0.7} position={[0, -5, 2]} rotation-x={-Math.PI / 2} scale={[10, 1.2, 1]} />
       <Lightformer form="rect" color={DEEP} intensity={0.45} position={[3, 3, -4]} scale={[6, 3, 1]} />
       <Lightformer form="ring" intensity={1.2} position={[2.5, 2.2, 5]} scale={0.6} />
@@ -333,13 +322,14 @@ export default function PetroleumScene({ accent = "#0a8539", reducedMotion = fal
     return () => io.disconnect();
   }, []);
 
-  const animate = !reducedMotion;
+  // Always animated; reduced-motion users get a slower, gentler flow instead of a frozen frame.
+  const speed = reducedMotion ? 0.35 : 1;
 
   return (
     <div ref={wrapper} className="absolute inset-0 transition-opacity duration-[1400ms] ease-out" style={{ opacity: ready ? 1 : 0 }} aria-hidden="true">
       <Canvas
         dpr={quality === "high" ? [1, 2] : [1, 1.4]}
-        frameloop={visible ? (animate ? "always" : "demand") : "never"}
+        frameloop={visible ? "always" : "never"}
         camera={{ position: [0, 0, 6.2], fov: 32 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         onCreated={({ gl }) => {
@@ -349,8 +339,8 @@ export default function PetroleumScene({ accent = "#0a8539", reducedMotion = fal
         }}
       >
         <Studio accent={accent} />
-        <Rig animate={animate}>
-          <OilDrop quality={quality} animate={animate} />
+        <Rig speed={speed}>
+          <Splash quality={quality} speed={speed} />
         </Rig>
       </Canvas>
     </div>
