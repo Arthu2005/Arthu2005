@@ -5,7 +5,6 @@
 
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Lightformer } from "@react-three/drei";
-import { DepthOfField, EffectComposer, N8AO } from "@react-three/postprocessing";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { dripOrigins, recycleGeometry, symbolBounds } from "./recycle-geometry";
@@ -456,12 +455,6 @@ export default function PetroleumScene({ accent = "#1c782b", reducedMotion = fal
           <Sculpture quality={quality} speed={speed} />
         </Rig>
         <ContactShadows position={[0, POOL_Y - 0.03, 0]} scale={6} blur={2.6} opacity={0.32} far={3} resolution={512} color="#0b120e" />
-        {quality === "high" && (
-          <EffectComposer multisampling={4} enableNormalPass={false}>
-            <N8AO aoRadius={0.5} intensity={1.6} distanceFalloff={0.6} halfRes />
-            <DepthOfField target={[0, 0, 0.3]} focalLength={0.12} bokehScale={0.9} height={540} />
-          </EffectComposer>
-        )}
       </Canvas>
     </div>
   );

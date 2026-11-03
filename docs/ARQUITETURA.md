@@ -62,7 +62,7 @@ Ao redor, o petróleo é procedural e animado na GPU:
 - a **poça** orgânica na base ondula no ponto onde cada gota cai;
 - **gotas suspensas** completam a composição.
 
-A iluminação vem de um estúdio de `Lightformer` (sem HDR externo), com reflexos brancos, verdes e limão, sombra de contato e, nos aparelhos de qualidade alta, oclusão ambiental (N8AO) e profundidade de campo sutil. O conjunto gira levemente acompanhando o cursor.
+A iluminação vem de um estúdio de `Lightformer` (sem HDR externo), com reflexos brancos, verdes e limão e sombra de contato. Não há pós-processamento: a oclusão ambiental (N8AO) quebrava a cena em placas de vídeo de desktop e o compositor apagava o fundo transparente. Se a cena falhar, o hero mostra a imagem estática `public/images/oil-poster.webp`. O conjunto gira levemente acompanhando o cursor.
 
 **Modelo GLB** (`public/models/petrolub-reciclagem-petroleo.glb`, gerado por `npm run model:export`): símbolo e pose estática do petróleo, com materiais PBR separados (`PETROLUB_Verde` e `Petroleo`, ambos com `KHR_materials_clearcoat`), malhas quantizadas e cerca de 87 mil triângulos. Serve para uso em outras ferramentas; o site usa a versão procedural animada.
 
