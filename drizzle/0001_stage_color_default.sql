@@ -1,0 +1,1 @@
+ALTER TABLE "pipeline_stages" ALTER COLUMN "color" SET DEFAULT '#5a645e';
