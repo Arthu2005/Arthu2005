@@ -54,6 +54,8 @@ Markdown é renderizado por `src/components/Markdown.tsx`, que constrói element
 
 ## Petróleo 3D (`PetroleumScene`)
 
-Metaballs em *marching cubes* (drei) com `meshPhysicalMaterial` preto (clearcoat) e ambiente de estúdio criado com `Lightformer` (sem download de HDR). `HeroStage` escolhe o modo: WebGL alto/médio conforme CPU/memória/tela, ou **pôster estático** (`public/images/oil-poster.webp`) para *data saver*, 2G, aparelhos fracos ou ausência de WebGL. Com `prefers-reduced-motion`, a cena fica parada. A renderização pausa fora da tela; a cena é carregada só após o navegador ficar ocioso, preservando o LCP (texto do hero).
+Uma única gota de petróleo modelada na GPU: uma icosfera de alta resolução (96 subdivisões no modo alto, 48 no médio) deformada no *vertex shader* com ruído simplex em camadas (correntes viscosas lentas) e um perfil em forma de lágrima. As normais são recalculadas por diferenças finitas, então os reflexos seguem a superfície deformada. O ciclo de gotejamento (7,5 s) faz o fundo pesar e formar um pescoço; a gotinha se solta e cai esticando conforme a velocidade, e o corpo balança no tranco. A superfície se estica na direção do cursor; sem mouse, segue um ponto virtual lento, então a gota está sempre viva. O material é `meshPhysicalMaterial` preto com *clearcoat*, num estúdio de `Lightformer` (sem download de HDR) com faixas branca, verde e limão, mais uma borda de Fresnel limão sutil.
+
+`HeroStage` escolhe o modo conforme CPU, memória e tela: WebGL alto, WebGL médio ou **pôster estático** (`public/images/oil-poster.webp`). O pôster entra no *data saver*, em 2G, em aparelhos fracos ou sem WebGL. Com `prefers-reduced-motion`, a gota fica parada. A renderização pausa fora da tela, e a cena só carrega quando o navegador fica ocioso, preservando o LCP (o texto do hero).
 
 Para regenerar o pôster após mudar a cena, capture o `<canvas>` da home com fundo transparente e salve como WEBP em `public/images/oil-poster.webp`.
