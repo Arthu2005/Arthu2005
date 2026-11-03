@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { Component, useEffect, useState, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 
 const PetroleumScene = dynamic(() => import("./PetroleumScene"), { ssr: false });
@@ -25,6 +25,24 @@ function detect(): Mode {
   // weak devices still get the live scene, at the lighter quality tier
   if (small || cores <= 4 || mem <= 4) return "webgl-medium";
   return "webgl-high";
+}
+
+/**
+ * Contains any failure of the 3D scene (GPU/driver errors, lost context, a chunk that failed to load) so it
+ * never takes the whole page down: the hero simply falls back to the static poster.
+ */
+class SceneBoundary extends Component<{ onError: () => void; children: ReactNode }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: unknown) {
+    console.warn("Hero 3D desativado, exibindo imagem estática:", error);
+    this.props.onError();
+  }
+  render() {
+    return this.state.failed ? null : this.props.children;
+  }
 }
 
 /**
@@ -52,7 +70,9 @@ export function HeroStage({ accent }: { accent: string }) {
         aria-hidden="true"
       />
       {(mode === "webgl-high" || mode === "webgl-medium") && (
-        <PetroleumScene accent={accent} reducedMotion={reduced} quality={mode === "webgl-high" ? "high" : "medium"} />
+        <SceneBoundary onError={() => setMode("static")}>
+          <PetroleumScene accent={accent} reducedMotion={reduced} quality={mode === "webgl-high" ? "high" : "medium"} />
+        </SceneBoundary>
       )}
     </div>
   );
