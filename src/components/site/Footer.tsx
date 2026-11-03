@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { s, rep, type Bag } from "@/lib/content/queries";
-import { Logo } from "./Logo";
 import { NAV } from "./nav";
 import { CookiePreferencesButton } from "./CookieConsent";
-import type { ImageValue } from "@/lib/content/fields";
 
 function Social({ href, label }: { href: string; label: string }) {
   if (!href) return null;
@@ -26,7 +24,16 @@ export function Footer({ general, contact, social, footer }: { general: Bag; con
       <div className="container-x pt-20 pb-10 md:pt-28">
         <div className="grid gap-12 md:grid-cols-12">
           <div className="md:col-span-5">
-            <Logo logo={general.logo as ImageValue} inverted />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/brand/logo-petrolub-60-anos-white.webp"
+              alt="PETROLUB Industrial de Lubrificantes — 60 anos"
+              width={1200}
+              height={330}
+              loading="lazy"
+              decoding="async"
+              className="h-12 w-auto md:h-14"
+            />
             <p className="mt-6 max-w-sm text-lg leading-relaxed text-white/60">{s(footer, "tagline")}</p>
           </div>
           <nav className="md:col-span-2" aria-label="Rodapé">

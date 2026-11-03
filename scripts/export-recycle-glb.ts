@@ -2,8 +2,8 @@
  * Exports the hero sculpture as a GLB (public/models/petrolub-reciclagem-petroleo.glb):
  *  - "Simbolo_Reciclagem": the client's symbol (Potrace vector), extruded + bevelled, material PETROLUB_Verde
  *  - "Petroleo_Anel", "Petroleo_Poca", "Petroleo_Filete_*", "Petroleo_Gota_*": a still pose of the oil, material Petroleo
- * Materials are PBR (metallic-roughness + KHR_materials_clearcoat). The animated version lives in
- * src/components/site/PetroleumScene.tsx (procedural, GPU).
+ * Materials are PBR (metallic-roughness + KHR_materials_clearcoat). This was the previous hero concept;
+ * the site now uses the procedural Möbius loop in src/components/site/MobiusScene.tsx.
  *
  * Usage: npm run model:export
  */
