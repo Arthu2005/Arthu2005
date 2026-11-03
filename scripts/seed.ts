@@ -1,0 +1,408 @@
+/**
+ * Seeds the database with:
+ *  - pipeline stages
+ *  - page sections, settings and collection items (ONLY inserted when missing: never overwrites edits)
+ *  - optional demo jobs/applications flagged is_demo=true (pass --demo). Remove later in Admin › Configurações.
+ *
+ * Usage: npm run db:seed            (base content)
+ *        npm run db:seed -- --demo  (base content + demo data)
+ */
+import "./_env";
+import { and, eq, isNull, sql } from "drizzle-orm";
+
+const { db } = await import("@/lib/db");
+const S = await import("@/lib/db/schema");
+const { PAGES } = await import("@/lib/content/sections");
+const { SETTINGS } = await import("@/lib/content/settings");
+const { PRIVACY_TEMPLATE } = await import("@/lib/content/privacy-template");
+const { protocolCode } = await import("@/lib/crypto");
+const { addMonths } = await import("@/lib/labels");
+
+const withDemo = process.argv.includes("--demo") || ["1", "true"].includes(String(process.env.SEED_DEMO).toLowerCase());
+const OFFICIAL = "Fonte: petrolub.com.br, consultado em 11/2026.";
+
+/* Pipeline ------------------------------------------------------------ */
+const stages = [
+  { key: "recebida", label: "Recebida", color: "#8a948e", isTerminal: false },
+  { key: "triagem", label: "Em triagem", color: "#5a645e", isTerminal: false },
+  { key: "avaliacao", label: "Em avaliação", color: "#7cc62b", isTerminal: false },
+  { key: "entrevista", label: "Entrevista", color: "#0a8539", isTerminal: false },
+  { key: "final", label: "Etapa final", color: "#0b5a30", isTerminal: false },
+  { key: "aprovada", label: "Aprovada", color: "#0a3d22", isTerminal: true },
+  { key: "reprovada", label: "Reprovada", color: "#c0352b", isTerminal: true },
+  { key: "banco", label: "Banco de talentos", color: "#a6e22e", isTerminal: true },
+];
+for (const [i, st] of stages.entries()) {
+  await db.insert(S.pipelineStages).values({ ...st, sortOrder: i }).onConflictDoNothing({ target: S.pipelineStages.key });
+}
+
+/* Sections ------------------------------------------------------------ */
+let created = 0;
+let refreshed = 0;
+for (const page of PAGES) {
+  for (const sec of page.sections) {
+    const data = { ...sec.defaults };
+    if (page.page === "legal" && sec.key === "privacy") {
+      data.body = PRIVACY_TEMPLATE;
+      data.updatedAt = new Date().toISOString().slice(0, 10);
+    }
+    const res = await db
+      .insert(S.contentSections)
+      .values({ page: page.page, key: sec.key, data })
+      .onConflictDoNothing()
+      .returning({ id: S.contentSections.id });
+    created += res.length;
+    if (!res.length && !(page.page === "legal" && sec.key === "privacy")) {
+      // Sections never edited in the admin (updated_by IS NULL) follow the latest defaults in code.
+      const upd = await db
+        .update(S.contentSections)
+        .set({ data, updatedAt: new Date() })
+        .where(and(eq(S.contentSections.page, page.page), eq(S.contentSections.key, sec.key), isNull(S.contentSections.updatedBy), sql`${S.contentSections.data} <> ${JSON.stringify(data)}::jsonb`))
+        .returning({ id: S.contentSections.id });
+      refreshed += upd.length;
+    }
+  }
+}
+for (const st of SETTINGS) {
+  const ins = await db.insert(S.settings).values({ key: st.key, value: st.defaults }).onConflictDoNothing().returning({ key: S.settings.key });
+  if (!ins.length) {
+    // settings never edited in the admin follow the latest defaults in code
+    await db
+      .update(S.settings)
+      .set({ value: st.defaults, updatedAt: new Date() })
+      .where(and(eq(S.settings.key, st.key), isNull(S.settings.updatedBy), sql`${S.settings.value} <> ${JSON.stringify(st.defaults)}::jsonb`));
+  }
+}
+console.log(`✓ Seções: ${created} novas, ${refreshed} atualizadas (não editadas no painel)`);
+
+/* Collections ---------------------------------------------------------- */
+type Item = { collection: string; slug: string; title: string; status?: "draft" | "published"; data: Record<string, unknown> };
+const items: Item[] = [
+  // Metrics — official figures (validate periodically)
+  { collection: "metrics", slug: "desde-1966", title: "Ano de início", data: { value: "1966", label: "Início da atuação em coleta e rerrefino", provisional: false, source: OFFICIAL } },
+  { collection: "metrics", slug: "colaboradores", title: "Colaboradores", data: { value: "490+", label: "Colaboradores na matriz e nas filiais", provisional: false, source: OFFICIAL } },
+  { collection: "metrics", slug: "frota", title: "Frota", data: { value: "400", label: "Veículos de frota própria", provisional: false, source: OFFICIAL } },
+  { collection: "metrics", slug: "litros-mes", title: "Volume", data: { value: "6 mi", label: "Litros de OLUC coletados e rerrefinados por mês", provisional: false, source: "Fonte: petrolub.com.br/quem-somos (“mais de 6 milhões de litros por mês”), consultado em 11/2026." } },
+
+  { collection: "metrics", slug: "litros-ano-evitados", title: "Impacto", data: { value: "70 mi", label: "Litros de óleo usado por ano que deixam de ir para o meio ambiente", provisional: false, source: "Fonte: petrolub.com.br (página inicial e Quem somos), consultado em 11/2026." } },
+  { collection: "metrics", slug: "cidades", title: "Cidades", data: { value: "1.200+", label: "Cidades brasileiras atendidas pela coleta", provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante." } },
+
+  // Testimonials (published by PETROLUB on its official careers portal)
+  { collection: "testimonials", slug: "andre-lopes", title: "André Lopes", data: { role: "Especialista em T.I.", quote: "Trabalhar na Petrolub é muito mais do que rotina de trabalho. Aqui encontrei um ambiente onde as pessoas se importam de verdade umas com as outras, onde dá pra propor ideias, aprender e crescer junto com a equipe. Como responsável pela área de TI, tenho liberdade para inovar e trazer soluções que fazem diferença para os diferentes setores, com confiança e abertura da liderança. O que mais valorizo é a proximidade entre as pessoas e o clima colaborativo e humano que a empresa mantém.", photo: { src: "/images/team/andre.webp", alt: "André Lopes, Especialista em T.I. da PETROLUB" }, consent: true, provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante." } },
+  { collection: "testimonials", slug: "josiane-lino", title: "Josiane Lino", data: { role: "Analista de R.H.", quote: "Tenho orgulho de fazer parte da PETROLUB, uma empresa sólida, com 60 anos de mercado, que oferece segurança, estabilidade e oportunidades de aprendizado. Atuando no RH, com foco em Recrutamento e Seleção, encontro desafios diários que ampliam minha experiência e impulsionam meu desenvolvimento. É gratificante conectar talentos a uma empresa que constrói sua história valorizando resultados e buscando excelência.", photo: { src: "/images/team/josiane.webp", alt: "Josiane Lino, Analista de R.H. da PETROLUB" }, consent: true, provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante." } },
+  { collection: "testimonials", slug: "maicon-freitas", title: "Maicon Freitas", data: { role: "Auxiliar Administrativo — Departamento Fiscal", quote: "Iniciei minha carreira na PETROLUB como aprendiz, experiência que me permitiu aprender na prática com profissionais que contribuíram para minha formação. Depois fui efetivado e passei a atuar na área Fiscal, onde sigo ampliando conhecimentos e desenvolvendo novas habilidades. O que mais valorizo é ter espaço para contribuir com ideias e seguir construindo minha trajetória profissional dentro da empresa.", photo: { src: "", alt: "" }, consent: true, provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante. Foto indisponível no portal (arquivo com nome incompleto)." } },
+  { collection: "testimonials", slug: "fagner-batista", title: "Fagner Batista", data: { role: "Supervisor de Produção", quote: "Fui formado na própria Petrolub, o que me deu a chance de crescer junto com a empresa e entender o processo de dentro para fora. Hoje, como Supervisor de Produção, meu papel é garantir que cada etapa aconteça com segurança, qualidade e eficiência, próximo da operação, buscando melhoria contínua ao lado da equipe. Acredito que liderança de verdade é dar direção clara e confiar no time.", photo: { src: "/images/team/fagner.webp", alt: "Fagner Batista, Supervisor de Produção da PETROLUB" }, consent: true, provisional: false, source: "Fonte: portal de carreiras oficial da PETROLUB (petrolub.vagas.solides.com.br), consultado em 11/2026. Uso autorizado pelo contratante." } },
+
+  // Solutions
+  {
+    collection: "solutions",
+    slug: "coleta-de-oleo-lubrificante-usado",
+    title: "Coleta de óleo lubrificante usado",
+    data: {
+      category: "servico",
+      summary: "Retirada do óleo lubrificante usado ou contaminado (OLUC) com frota própria e emissão do Certificado de Coleta (CCO).",
+      description:
+        "A PETROLUB realiza a coleta de OLUC em mais de 1.200 municípios de todo o país, em conformidade com as normas ambientais e regulatórias, assegurando a destinação ambientalmente adequada: o rerrefino.\n\nA frota própria, de cerca de 400 veículos, reúne caminhões e carretas com capacidade de 2.000 a 60.000 litros, distribuídos em diferentes regiões do Brasil. Coleta e transporte são de responsabilidade exclusiva da PETROLUB, com veículos adequados e profissionais treinados. Todo o óleo coletado segue para a unidade de rerrefino em Sete Lagoas (MG).\n\nA solicitação de coleta pode ser feita pelo 0800, pelo formulário de contato ou com a filial da sua região.",
+      applications: ["Destinação de óleo lubrificante usado ou contaminado (OLUC)"],
+      segments: [],
+      specs: [],
+      image: { src: "/images/unidades/motorista-coleta.webp", alt: "Motorista da PETROLUB conectando a mangueira de coleta ao caminhão-tanque" },
+      documents: [],
+      featured: true,
+      provisional: false,
+      source: `Fonte: petrolub.com.br/servicos e /quem-somos, consultado em 11/2026. Segmentos atendidos: aguardando lista oficial.`,
+    },
+  },
+  {
+    collection: "solutions",
+    slug: "rerrefino",
+    title: "Rerrefino",
+    data: {
+      category: "servico",
+      summary: "Processo industrial que remove impurezas e aditivos degradados do óleo usado e recupera o óleo básico.",
+      description:
+        "Todo o OLUC coletado pela PETROLUB nas diferentes regiões do país é destinado, de forma exclusiva, à unidade industrial de rerrefino em Sete Lagoas (MG).\n\nO rerrefino é um processo industrial que remove impurezas, contaminantes e aditivos degradados do óleo usado. O resultado é a recuperação do óleo básico, que retorna à cadeia produtiva como matéria-prima para novos óleos lubrificantes, fechando um ciclo sustentável para esse resíduo.",
+      applications: [],
+      segments: [],
+      specs: [],
+      image: { src: "/images/unidades/matriz-sete-lagoas-aerea-2.webp", alt: "Vista aérea da matriz e unidade de rerrefino da PETROLUB em Sete Lagoas (MG)" },
+      documents: [],
+      featured: true,
+      provisional: false,
+      source: "Fonte: petrolub.com.br/servicos, consultado em 11/2026.",
+    },
+  },
+  {
+    collection: "solutions",
+    slug: "oleo-basico-rerrefinado",
+    title: "Óleo Básico Rerrefinado Grupo I",
+    data: {
+      category: "produto",
+      summary: "Óleo básico classificado como Grupo I, produzido em conformidade com as especificações estabelecidas pela ANP.",
+      description:
+        "O rerrefino gera o Óleo Básico Rerrefinado classificado como Grupo I (GI), com elevado padrão de qualidade e em conformidade com as especificações estabelecidas pela ANP. Ele é destinado a grandes produtoras de óleos lubrificantes automotivos e industriais, que o reintroduzem no mercado.\n\nÉ a alternativa sustentável para indústrias e distribuidores: ao adquirir o óleo básico rerrefinado (RR), a empresa contribui para a economia circular, diminui a dependência de recursos fósseis e fortalece práticas de ESG. Para cotação, informe razão social, CNPJ, autorização da ANP, volume pretendido (m³) e se a demanda é mensal ou pontual.\n\n*Ficha técnica, laudos e propriedades devem ser cadastrados a partir de documentos oficiais.*",
+      applications: ["Matéria-prima para formulação de lubrificantes"],
+      segments: [],
+      specs: [],
+      image: { src: "/images/unidades/parque-de-tancagem.webp", alt: "Vista aérea do parque de tancagem de uma unidade da PETROLUB" },
+      documents: [],
+      featured: true,
+      provisional: false,
+      source: "Fonte: petrolub.com.br/servicos e /compre-oleo-rr, consultado em 11/2026. Especificações técnicas: pendentes (não inventar).",
+    },
+  },
+  {
+    collection: "solutions",
+    slug: "documentacao-ambiental",
+    title: "Documentação ambiental",
+    data: {
+      category: "documentacao",
+      summary: "Emissão do CCO e do CDF e apoio ao MTR para comprovar a destinação ambientalmente adequada do resíduo.",
+      description:
+        "Para o gerador do resíduo, comprovar a destinação correta é tão importante quanto a coleta. A PETROLUB emite:\n\n- **CCO** — Certificado de Coleta de OLUC;\n- **CDF** — Certificado de Destinação Final;\n\ne oferece apoio para o **MTR** — Manifesto de Transporte de Resíduos.",
+      applications: ["Comprovação de destinação de resíduos", "Apoio a auditorias e licenciamento do gerador"],
+      segments: [],
+      specs: [],
+      image: { src: "/images/unidades/equipe-atendimento.webp", alt: "Equipe de atendimento da PETROLUB com headsets no escritório" },
+      documents: [],
+      featured: false,
+      provisional: false,
+      source: OFFICIAL,
+    },
+  },
+
+  // Timeline
+  { collection: "timeline", slug: "1966", title: "Início da atuação", data: { year: "1966", text: "Início da atuação no mercado de coleta e rerrefino de óleo lubrificante usado.", provisional: false, source: OFFICIAL } },
+  { collection: "timeline", slug: "2003", title: "Filial Linhares (ES)", data: { year: "2003", text: "Início da operação em Linhares, atendendo o Espírito Santo, a Zona da Mata mineira e o sul da Bahia.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "2004", title: "Filial Duque de Caxias (RJ)", data: { year: "2004", text: "Início da operação em Duque de Caxias, atendendo o Rio de Janeiro e o sul de Minas Gerais.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "2007", title: "Filial Aparecida de Goiânia (GO)", data: { year: "2007", text: "Início da operação em Aparecida de Goiânia, atendendo o Centro-Oeste, o Triângulo Mineiro e localidades do Norte e do Nordeste.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "2019", title: "Filial Americana (SP)", data: { year: "2019", text: "Início da operação em Americana, atendendo todo o estado de São Paulo.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "2024", title: "Filiais na Bahia e no Paraná", data: { year: "2024", text: "Início das operações em Conceição do Jacuípe (BA), para a Bahia e o Nordeste, e em Pinhais (PR), para a região Sul.", provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais, consultado em 11/2026." } },
+  { collection: "timeline", slug: "hoje", title: "60 anos", data: { year: "Hoje", text: "60 anos de mercado, mais de 490 colaboradores, frota própria de cerca de 400 veículos e coleta em mais de 1.200 municípios.", provisional: false, source: "Fonte: petrolub.com.br/quem-somos, consultado em 11/2026." } },
+
+  // Locations
+  {
+    collection: "locations",
+    slug: "sete-lagoas",
+    title: "Matriz — Sete Lagoas",
+    data: { type: "matriz", city: "Sete Lagoas", state: "MG", since: "1966", coverage: "Rerrefino de todo o OLUC coletado e coleta em Minas Gerais", address: "Rod. Pres. Juscelino Kubitschek (BR-040), km 461 — Zona Rural · CEP 35701-970", phone: "+55 (31) 2106-2800", email: "contato@petrolub.com.br", provisional: false, source: "Fonte: petrolub.com.br/contato e /estrutura-e-filiais, consultado em 11/2026." },
+  },
+  // Filiais: temporary storage of the OLUC collected in each region (all oil is re-refined in Sete Lagoas)
+  ...(
+    [
+      ["linhares", "Linhares", "ES", "2003", "Espírito Santo, Zona da Mata de Minas Gerais e sul da Bahia", "Av. Padre Manoel da Nóbrega, 61 — Bairro Interlagos · CEP 29903-490", "(27) 3373-5310 · (31) 99618-9282", "comercial.es@petrolub.com.br"],
+      ["duque-de-caxias", "Duque de Caxias", "RJ", "2004", "Rio de Janeiro e sul de Minas Gerais", "Rua Projetada, 75 — Bairro Jardim Primavera · CEP 25213-187", "(21) 2676-9398 · (31) 97187-5517", "comercial.rj@petrolub.com.br"],
+      ["aparecida-de-goiania", "Aparecida de Goiânia", "GO", "2007", "Centro-Oeste, Triângulo Mineiro e localidades do Norte e do Nordeste", "Av. Guatacazes, s/n — Bairro Jardim Eldorado · CEP 74993-090", "(62) 3283-4070 · (62) 3283-7075 · (31) 99961-4222", "comercial.go@petrolub.com.br"],
+      ["americana", "Americana", "SP", "2019", "Todo o estado de São Paulo", "Rua do Marceneiro, 302 — Quadra D, Lote 21 · CEP 13478-722", "(31) 97241-3034 · (31) 99767-3865", "comercial.sp@petrolub.com.br"],
+      ["conceicao-do-jacuipe", "Conceição do Jacuípe", "BA", "2024", "Bahia e região Nordeste", "Loteamento Lagoa do Bosque, s/n — Quadra A1, Lote 01, Centro · CEP 44245-000", "(75) 99841-9738 · (31) 99938-5972", "comercial.ba@petrolub.com.br"],
+      ["pinhais", "Pinhais", "PR", "2024", "Região Sul do Brasil", "Rua Salgado Filho, 211 — Jardim Amélia · CEP 83330-110", "(31) 97241-3034", "comercial.pr@petrolub.com.br"],
+    ] as const
+  ).map(([slug, city, uf, since, coverage, address, phone, email]) => ({
+    collection: "locations",
+    slug,
+    title: `Filial — ${city}`,
+    data: { type: "base", city, state: uf, since, coverage, address, phone, email, provisional: false, source: "Fonte: petrolub.com.br/estrutura-e-filiais e /coleta, consultado em 11/2026." },
+  })),
+
+  // Sustainability & quality
+  ...[
+    ["anp", "Autorização ANP", "Autorização da Agência Nacional do Petróleo, Gás Natural e Biocombustíveis para coleta e rerrefino de OLUC."],
+    ["ibama", "IBAMA / CTF", "Registro no Cadastro Técnico Federal e licença do IBAMA."],
+    ["anvisa", "ANVISA", "Autorização da Agência Nacional de Vigilância Sanitária."],
+    ["avcb", "AVCB", "Auto de Vistoria do Corpo de Bombeiros."],
+    ["licenca-ambiental", "Licença Ambiental", "Licenciamento ambiental da unidade industrial."],
+  ].map(([slug, title, summary], i) => ({
+    collection: "sustainability",
+    slug: slug!,
+    title: title!,
+    data: { kind: "license", summary, body: "", value: "", date: "", file: { src: "", name: "" }, link: "", provisional: true, source: `${OFFICIAL} A empresa cita as autorizações; anexar número/validade e documento oficial antes de remover o selo provisório. (#${i + 1})` },
+  })),
+  {
+    collection: "sustainability",
+    slug: "logistica-reversa",
+    title: "Logística reversa do OLUC",
+    data: { kind: "policy", summary: "Compromisso com a preservação ambiental por meio da logística reversa do óleo lubrificante usado ou contaminado.", body: "", value: "", date: "", file: { src: "", name: "" }, link: "", provisional: false, source: OFFICIAL },
+  },
+  {
+    collection: "sustainability",
+    slug: "volume-rerrefinado",
+    title: "Volume coletado e rerrefinado",
+    data: { kind: "indicator", summary: "Litros de óleo lubrificante usado ou contaminado coletados e rerrefinados por mês.", body: "", value: "6 mi L/mês", date: "", file: { src: "", name: "" }, link: "", provisional: false, source: "Fonte: petrolub.com.br/quem-somos, consultado em 11/2026." },
+  },
+
+  // FAQ
+  { collection: "faqs", slug: "como-solicitar-coleta", title: "Como solicito a coleta de óleo usado?", data: { scope: "solucoes", answer: "Entre em contato pelo 0800 ou pelo formulário desta página, escolhendo o assunto “Solicitar coleta de óleo usado”. Também é possível falar com o contato comercial da sua região.", provisional: false, source: OFFICIAL } },
+  { collection: "faqs", slug: "quais-documentos", title: "Quais documentos recebo após a coleta?", data: { scope: "solucoes", answer: "A PETROLUB emite o Certificado de Coleta de OLUC (CCO) e o Certificado de Destinação Final (CDF), e dá apoio ao Manifesto de Transporte de Resíduos (MTR).", provisional: false, source: OFFICIAL } },
+  { collection: "faqs", slug: "como-acompanhar-candidatura", title: "Como acompanho minha candidatura?", data: { scope: "carreiras", answer: "Ao enviar a candidatura você recebe um número de protocolo. A equipe de recrutamento entra em contato pelo e-mail ou telefone informados caso o seu perfil avance no processo.", provisional: false, source: "" } },
+  { collection: "faqs", slug: "posso-me-candidatar-a-mais-de-uma-vaga", title: "Posso me candidatar a mais de uma vaga?", data: { scope: "carreiras", answer: "Sim. Você pode se candidatar a vagas diferentes, mas apenas uma vez para cada vaga.", provisional: false, source: "" } },
+  { collection: "faqs", slug: "como-excluir-meus-dados", title: "Como solicito a exclusão dos meus dados?", data: { scope: "carreiras", answer: "Escreva para o encarregado de dados informando o número de protocolo. Os detalhes estão na [Política de privacidade](/privacidade).", provisional: false, source: "" } },
+];
+
+let itemsCreated = 0;
+let itemsUpdated = 0;
+for (const [i, it] of items.entries()) {
+  const res = await db
+    .insert(S.contentItems)
+    .values({ collection: it.collection, slug: it.slug, title: it.title, status: it.status ?? "published", sortOrder: i, data: it.data })
+    .onConflictDoNothing()
+    .returning({ id: S.contentItems.id });
+  itemsCreated += res.length;
+  if (res.length) continue;
+  // Items never edited in the admin (updated_by IS NULL) follow the latest defaults in code.
+  const upd = await db
+    .update(S.contentItems)
+    .set({ title: it.title, sortOrder: i, data: it.data })
+    .where(
+      and(
+        eq(S.contentItems.collection, it.collection),
+        eq(S.contentItems.slug, it.slug),
+        isNull(S.contentItems.updatedBy),
+        sql`(${S.contentItems.data} <> ${JSON.stringify(it.data)}::jsonb OR ${S.contentItems.title} <> ${it.title} OR ${S.contentItems.sortOrder} <> ${i})`,
+      ),
+    )
+    .returning({ id: S.contentItems.id });
+  itemsUpdated += upd.length;
+}
+console.log(`✓ Itens de coleção: ${itemsCreated} novos, ${itemsUpdated} atualizados (não editados no painel)`);
+
+/* Demo data ------------------------------------------------------------ */
+if (withDemo) {
+  const demoJobs: (typeof S.jobs.$inferInsert)[] = [
+    {
+      slug: "demo-motorista-de-coleta-sete-lagoas",
+      title: "Motorista de coleta (DEMONSTRAÇÃO)",
+      department: "Logística e coleta",
+      city: "Sete Lagoas",
+      state: "MG",
+      workModel: "presencial",
+      contractType: "CLT",
+      summary: "Vaga fictícia para demonstrar o portal. Realizar a coleta de óleo lubrificante usado em clientes da região.",
+      description: "**Esta é uma vaga de demonstração** criada para testar o portal de carreiras. Não envie candidaturas reais.",
+      responsibilities: ["Conduzir o veículo de coleta com segurança", "Conferir a documentação de coleta", "Seguir os procedimentos de segurança e meio ambiente"],
+      requirements: ["CNH na categoria exigida pela operação", "Disponibilidade para viagens"],
+      niceToHave: ["Curso MOPP"],
+      benefits: [],
+      selectionSteps: ["Análise de currículo", "Entrevista", "Teste prático"],
+      questions: [
+        { id: "q1", label: "Qual categoria da sua CNH?", type: "select", required: true, options: ["B", "C", "D", "E"] },
+        { id: "q2", label: "Possui curso MOPP válido?", type: "yesno", required: true },
+      ],
+      status: "published",
+      featured: true,
+      isDemo: true,
+      publishedAt: new Date(),
+    },
+    {
+      slug: "demo-analista-de-laboratorio",
+      title: "Analista de laboratório (DEMONSTRAÇÃO)",
+      department: "Qualidade e laboratório",
+      city: "Sete Lagoas",
+      state: "MG",
+      workModel: "presencial",
+      contractType: "CLT",
+      summary: "Vaga fictícia para demonstrar o portal. Apoiar o controle de qualidade do óleo básico rerrefinado.",
+      description: "**Esta é uma vaga de demonstração** criada para testar o portal de carreiras.",
+      responsibilities: ["Realizar análises físico-químicas", "Registrar resultados", "Apoiar auditorias de qualidade"],
+      requirements: ["Formação técnica ou superior em Química"],
+      niceToHave: [],
+      benefits: [],
+      selectionSteps: ["Análise de currículo", "Entrevista técnica"],
+      questions: [],
+      status: "published",
+      isDemo: true,
+      publishedAt: new Date(Date.now() - 86400000 * 3),
+    },
+    {
+      slug: "demo-assistente-comercial-hibrido",
+      title: "Assistente comercial (DEMONSTRAÇÃO)",
+      department: "Comercial",
+      city: "Americana",
+      state: "SP",
+      workModel: "hibrido",
+      contractType: "CLT",
+      summary: "Vaga fictícia para demonstrar o portal. Atendimento a geradores de óleo usado e agendamento de coletas.",
+      description: "**Esta é uma vaga de demonstração** criada para testar o portal de carreiras.",
+      responsibilities: ["Atender clientes por telefone e e-mail", "Agendar coletas", "Atualizar o CRM"],
+      requirements: ["Ensino médio completo", "Boa comunicação"],
+      niceToHave: ["Experiência com logística"],
+      benefits: [],
+      selectionSteps: [],
+      questions: [{ id: "q1", label: "Conte, em poucas linhas, sua experiência com atendimento.", type: "textarea", required: false }],
+      status: "published",
+      isDemo: true,
+      publishedAt: new Date(Date.now() - 86400000 * 7),
+    },
+    {
+      slug: "demo-jovem-aprendiz-encerrada",
+      title: "Jovem aprendiz (DEMONSTRAÇÃO — encerrada)",
+      department: "Administrativo e financeiro",
+      city: "Sete Lagoas",
+      state: "MG",
+      workModel: "presencial",
+      contractType: "Jovem Aprendiz",
+      summary: "Vaga fictícia encerrada, usada para demonstrar a página de vaga indisponível.",
+      description: "**Esta é uma vaga de demonstração.**",
+      status: "closed",
+      isDemo: true,
+      publishedAt: new Date(Date.now() - 86400000 * 40),
+      closedAt: new Date(Date.now() - 86400000 * 10),
+    },
+  ];
+  for (const j of demoJobs) await db.insert(S.jobs).values(j).onConflictDoNothing();
+
+  const [job] = await db.select().from(S.jobs).where(eq(S.jobs.slug, "demo-motorista-de-coleta-sete-lagoas"));
+  const [stage] = await db.select().from(S.pipelineStages).where(eq(S.pipelineStages.key, "recebida"));
+  if (job && stage) {
+    const [existing] = await db.select({ n: sql<number>`count(*)::int` }).from(S.applications).where(and(eq(S.applications.jobId, job.id), eq(S.applications.isDemo, true)));
+    if (!existing?.n) {
+      const people = [
+        ["Pessoa Demonstração Um", "demo1@example.com"],
+        ["Pessoa Demonstração Dois", "demo2@example.com"],
+      ];
+      for (const [name, email] of people) {
+        await db.insert(S.applications).values({
+          protocol: protocolCode("DEMO"),
+          jobId: job.id,
+          stageId: stage.id,
+          fullName: name!,
+          email: email!,
+          phone: "(31) 90000-0000",
+          city: "Sete Lagoas",
+          state: "MG",
+          answers: [
+            { questionId: "q1", label: "Qual categoria da sua CNH?", answer: "E" },
+            { questionId: "q2", label: "Possui curso MOPP válido?", answer: "Sim" },
+          ],
+          consentPrivacy: true,
+          consentVersion: "demo",
+          consentAt: new Date(),
+          isDemo: true,
+          retentionUntil: addMonths(new Date(), 1),
+        });
+      }
+    }
+  }
+  console.log("✓ Dados de demonstração criados (is_demo = true)");
+}
+
+/* Bootstrap admin (hosted deploys without shell access) ------------------------------
+ * If ADMIN_EMAIL + ADMIN_PASSWORD are set and no administrator exists yet, create one.
+ * Never overwrites an existing account. Remove the variables after the first login. */
+if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+  const { hashPassword, passwordPolicyError } = await import("@/lib/auth/password");
+  const [anyAdmin] = await db.select({ id: S.users.id }).from(S.users).where(eq(S.users.role, "admin")).limit(1);
+  const policy = passwordPolicyError(process.env.ADMIN_PASSWORD);
+  if (anyAdmin) console.log("• Administrador já existe — ADMIN_EMAIL/ADMIN_PASSWORD ignorados");
+  else if (policy) console.warn(`⚠ ADMIN_PASSWORD rejeitada: ${policy}`);
+  else {
+    await db.insert(S.users).values({
+      email: process.env.ADMIN_EMAIL.trim().toLowerCase(),
+      name: process.env.ADMIN_NAME?.trim() || "Administrador",
+      role: "admin",
+      passwordHash: await hashPassword(process.env.ADMIN_PASSWORD),
+    });
+    console.log(`✓ Administrador ${process.env.ADMIN_EMAIL} criado`);
+  }
+}
+
+process.exit(0);
