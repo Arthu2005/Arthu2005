@@ -2,7 +2,9 @@
 
 ## Fontes consultadas
 
-Acesso direto bloqueado pela rede do ambiente; os fatos abaixo foram obtidos de resultados de busca que indexam as páginas oficiais.
+> **Atualização (11/2026):** segundo o contratante, o site institucional petrolub.com.br **saiu do ar**; o único canal web ativo da empresa é o portal de carreiras na Sólides. Os fatos abaixo vieram das páginas antigas do site, ainda indexadas nos buscadores. Por isso, todos devem ser revalidados pela PETROLUB antes do lançamento. Este novo site passa a ser o canal institucional oficial.
+
+O acesso direto às páginas estava bloqueado pela rede do ambiente; os fatos foram obtidos de resultados de busca que indexavam as páginas oficiais.
 
 - petrolub.com.br — página inicial, `/quem-somos`, `/servicos`, `/estrutura-e-filiais`, `/contato`, `/coleta`
 - LinkedIn oficial da PETROLUB (publicações sobre o 0800)
