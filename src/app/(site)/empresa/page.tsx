@@ -26,7 +26,7 @@ export default async function EmpresaPage() {
     getItems("metrics"),
   ]);
   const marks = bool(settings.general, "showProvisionalMarkers");
-  const { hero, history, purpose, structure, differentials, culture, commitments } = p;
+  const { hero, history, purpose, leadership, structure, differentials, culture, commitments } = p;
   const purposeItems = [
     ["Missão", s(purpose, "mission")],
     ["Visão", s(purpose, "vision")],
@@ -94,6 +94,27 @@ export default async function EmpresaPage() {
           )}
         </div>
       </section>
+
+      {/* Liderança */}
+      {s(leadership, "name") && (
+        <section className="container-x py-24 md:py-32">
+          <div className="grid items-center gap-10 lg:grid-cols-12">
+            <Reveal className="lg:col-span-5">
+              <ImageSlot image={img(leadership, "image")} className="aspect-[4/5] rounded-[var(--radius-card)]" label="Foto da liderança — pendente" />
+            </Reveal>
+            <Reveal delay={0.1} className="lg:col-span-6 lg:col-start-7">
+              <p className="eyebrow">{s(leadership, "eyebrow")}</p>
+              <h2 className="mt-6 text-h2 font-semibold">{s(leadership, "title")}</h2>
+              <Provisional show={marks && bool(leadership, "provisional")} className="mt-5" />
+              <div className="mt-10 border-l-2 border-lime pl-6">
+                <p className="font-display text-3xl font-semibold tracking-tight">{s(leadership, "name")}</p>
+                {s(leadership, "role") && <p className="mt-2 text-sm uppercase tracking-[0.18em] text-steel">{s(leadership, "role")}</p>}
+              </div>
+              {s(leadership, "body") && <Markdown source={s(leadership, "body")} className="mt-8" />}
+            </Reveal>
+          </div>
+        </section>
+      )}
 
       {/* Diferenciais */}
       <section className="container-x py-24 md:py-32">

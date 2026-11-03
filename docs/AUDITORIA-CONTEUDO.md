@@ -60,6 +60,8 @@ Certificações ISO, prêmios, indicadores ambientais adicionais, característic
 
 Não foram usadas fotos de banco de imagens apresentadas como reais. Os espaços de imagem exibem um placeholder gráfico identificado (“Foto oficial pendente”) até o envio de fotografias oficiais pela *Biblioteca de mídia*.
 
+As fotos em `public/images/equipe/` foram enviadas pela PETROLUB, que autorizou o uso das imagens publicadas no Facebook e no Instagram. Entre elas está o retrato da CEO Ana Paula Leal Corrêa, usado na seção *Liderança* de A Empresa. O nome e o cargo vêm do Instagram oficial (@petrolub.industrial). A mensagem da liderança fica vazia até a PETROLUB enviar um texto aprovado.
+
 ## Vagas
 
 As vagas de demonstração (marcadas “DEMONSTRAÇÃO”, `is_demo = true`) existem apenas para testes e são removidas em *Configurações › Dados de demonstração*. Vagas reais vistas na Sólides (ex.: Motorista, Jovem Aprendiz, Faxineira em Sete Lagoas) **não** foram copiadas, pois seus detalhes e status atuais não puderam ser confirmados.

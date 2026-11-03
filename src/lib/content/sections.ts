@@ -310,6 +310,28 @@ export const PAGES: PageDef[] = [
         },
       },
       {
+        key: "leadership",
+        label: "Liderança",
+        description: "Foto, nome e cargo de quem lidera a empresa. A mensagem é opcional: se ficar vazia, não é exibida.",
+        fields: [
+          ...heading,
+          { name: "name", label: "Nome", type: "text", required: true, max: 120 },
+          { name: "role", label: "Cargo", type: "text", max: 120 },
+          { name: "body", label: "Mensagem (opcional)", type: "markdown" },
+          { name: "image", label: "Foto", type: "image" },
+        ],
+        defaults: {
+          eyebrow: "Liderança",
+          title: "Quem conduz a PETROLUB.",
+          name: "Ana Paula Leal Corrêa",
+          role: "CEO",
+          body: "",
+          image: { src: "/images/equipe/ceo-ana-paula-leal-correa.webp", alt: "Retrato de Ana Paula Leal Corrêa, CEO da PETROLUB" },
+          provisional: false,
+          source: "Fonte: Instagram oficial @petrolub.industrial (publicação sobre a CEO); foto enviada pela PETROLUB.",
+        },
+      },
+      {
         key: "structure",
         label: "Estrutura e áreas de atuação",
         description: "As unidades são cadastradas em Coleções › Unidades.",
