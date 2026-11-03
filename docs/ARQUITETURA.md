@@ -52,19 +52,18 @@ Markdown é renderizado por `src/components/Markdown.tsx`, que constrói element
 - **Cabeçalhos**: CSP, HSTS (produção), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`; `/admin` com `noindex` e `no-store`.
 - **Dados pessoais**: IP nunca armazenado em claro (HMAC com `APP_SECRET`), e-mails de notificação interna não contêm dados do candidato.
 
-## Escultura 3D do hero (`PetroleumScene`)
+## Escultura 3D do hero (`MobiusScene`)
 
-Peça central: o **símbolo de reciclagem enviado pelo contratante**, vetorizado com Potrace a partir da arte original (6 peças em curvas Bézier, `src/components/site/recycle-symbol.ts`; SVG em `public/brand/simbolo-reciclagem.svg`). Ele é extrudado com chanfro e bordas arredondadas (`recycle-geometry.ts`), em material verde de alto brilho (*clearcoat*).
+Conceito: **o ciclo infinito do óleo**. O símbolo da reciclagem nasceu da fita de Möbius, uma superfície com meia torção, sem começo nem fim. No hero, ela é uma fita espessa de líquido. Ao percorrer o laço, o **petróleo preto e brilhante** (óleo usado) se transforma em **verde translúcido** (o óleo básico rerrefinado) e depois volta a escurecer, sem parar. A fronteira entre as duas fases corre junto com o fluxo.
 
-Ao redor, o petróleo é procedural e animado na GPU:
-- um **anel líquido** espesso orbita o símbolo, passando por trás e pela frente, com o fluxo correndo pela faixa e bordas que se desfazem;
-- **filetes** pendem das bordas inferiores, formam um bulbo que se solta e cai;
-- a **poça** orgânica na base ondula no ponto onde cada gota cai;
-- **gotas suspensas** completam a composição.
+Tudo é procedural e calculado na GPU, sem download de modelo:
+- a fita é uma malha paramétrica com seção elíptica que gira meia volta por laço, fechando sem emenda. A largura e a espessura pulsam com o fluxo, e a superfície ondula com ruído *simplex* proporcional à espessura, para as duas faces nunca se cruzarem;
+- o material físico recebe por *shader* a cor (preto → esmeralda), a rugosidade e o *clearcoat* de cada fase. A fase limpa tem brilho interno, que simula translucidez, e as duas têm uma borda verde-limão por *fresnel*;
+- **gotas** das duas fases orbitam o laço, que gira devagar sobre o próprio eixo para a torção aparecer de ângulos diferentes.
 
-A iluminação vem de um estúdio de `Lightformer` (sem HDR externo), com reflexos brancos, verdes e limão e sombra de contato. Não há pós-processamento: a oclusão ambiental (N8AO) quebrava a cena em placas de vídeo de desktop e o compositor apagava o fundo transparente. Se a cena falhar, o hero mostra a imagem estática `public/images/oil-poster.webp`. O conjunto gira levemente acompanhando o cursor. O hero também aceita um vídeo em loop com fundo transparente, configurado em *Admin › Conteúdo › Página inicial › Hero*, que tem prioridade sobre o 3D: ver [`BRIEFING-VIDEO-HERO.md`](BRIEFING-VIDEO-HERO.md).
+A iluminação vem de um estúdio de `Lightformer` (sem HDR externo), com sombra de contato. Não há pós-processamento: a oclusão ambiental (N8AO) quebrava a cena em placas de vídeo de desktop e o compositor apagava o fundo transparente. Se a cena falhar, o hero mostra a imagem estática `public/images/oil-poster.webp`, um quadro da própria cena. O conjunto acompanha o cursor. O hero também aceita um vídeo em loop com fundo transparente, configurado em *Admin › Conteúdo › Página inicial › Hero*, que tem prioridade sobre o 3D: ver [`BRIEFING-VIDEO-HERO.md`](BRIEFING-VIDEO-HERO.md).
 
-**Modelo GLB** (`public/models/petrolub-reciclagem-petroleo.glb`, gerado por `npm run model:export`): símbolo e pose estática do petróleo, com materiais PBR separados (`PETROLUB_Verde` e `Petroleo`, ambos com `KHR_materials_clearcoat`), malhas quantizadas e cerca de 87 mil triângulos. Serve para uso em outras ferramentas; o site usa a versão procedural animada.
+**Modelo GLB do conceito anterior** (`public/models/petrolub-reciclagem-petroleo.glb`, gerado por `npm run model:export`): o símbolo de reciclagem envolvido por petróleo, em pose estática, com materiais PBR separados (`PETROLUB_Verde` e `Petroleo`, ambos com `KHR_materials_clearcoat`), malhas quantizadas e cerca de 87 mil triângulos. Não é usado pelo site; fica disponível para outras peças de comunicação.
 
 `HeroStage` escolhe a qualidade conforme CPU, memória e tela (WebGL alto ou médio; aparelhos fracos ficam no médio). O **pôster estático** (`public/images/oil-poster.webp`) só aparece sem WebGL, no *data saver* ou em 2G. Com `prefers-reduced-motion`, a animação continua, mais lenta e suave. A renderização pausa fora da tela, e a cena só carrega quando o navegador fica ocioso, preservando o LCP (o texto do hero).
 

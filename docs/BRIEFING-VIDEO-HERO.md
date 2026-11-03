@@ -1,24 +1,24 @@
-# Briefing: vídeo do hero (símbolo de reciclagem + petróleo)
+# Briefing: vídeo do hero (o ciclo infinito do óleo)
 
-Documento para o artista 3D ou motion designer que vai produzir o vídeo em loop da primeira dobra do site da PETROLUB. O site já está pronto para receber o arquivo: enquanto não houver vídeo, ele exibe uma versão 3D em tempo real e, se ela falhar, uma imagem estática.
+Documento para o artista 3D ou motion designer que vai produzir o vídeo em loop da primeira dobra do site da PETROLUB. O site já está pronto para receber o arquivo: enquanto não houver vídeo, ele exibe uma versão 3D em tempo real desse mesmo conceito (`src/components/site/MobiusScene.tsx`) e, se ela falhar, uma imagem estática.
 
 ## Conceito
 
-O símbolo de reciclagem da PETROLUB, em verde, é envolvido por petróleo preto e espesso, em movimento contínuo. A mensagem é a da empresa: o óleo lubrificante usado é coletado e volta ao ciclo, em vez de chegar ao solo e à água.
+O símbolo da reciclagem nasceu da **fita de Möbius**: uma superfície com meia torção, que não tem começo nem fim. O vídeo mostra essa fita feita de líquido. Ao percorrer o laço, o **petróleo preto e espesso** (óleo lubrificante usado) se transforma gradualmente em **óleo limpo, verde e translúcido** (o óleo básico rerrefinado) e depois volta a escurecer, num ciclo contínuo. A mensagem é a da empresa: o óleo usado é coletado, rerrefinado e volta à indústria, em vez de chegar ao solo e à água.
 
-- **Símbolo:** usar a geometria fiel do arquivo fornecido pela PETROLUB. Não redesenhar nem simplificar. Referências no repositório: o vetor em `src/components/site/recycle-symbol.ts`, o desenho em `public/brand/simbolo-reciclagem.svg` e o modelo `public/models/petrolub-reciclagem-petroleo.glb`, com materiais e malhas separados, que serve como ponto de partida.
-- **Material do símbolo:** verde de alto brilho com verniz (clearcoat) e chanfro visível nas bordas. Cor de referência `#156900`; o verde da marca é `#1c782b`. Nada de aparência de plástico fosco.
-- **Petróleo:** precisa parecer líquido viscoso de verdade, com simulação de fluido (FLIP/SPH), e não malha animada. Cor preta com reflexos especulares fortes e leve reflexo verde vindo do símbolo. Elementos:
-  - uma faixa de petróleo que orbita o símbolo, passando por trás e pela frente;
-  - filetes que escorrem das partes de baixo do símbolo e soltam gotas;
-  - uma poça na base que recebe as gotas, com ondulações;
-  - gotículas suspensas ao redor.
+- **Forma:** fita de Möbius larga e espessa, com a meia torção bem legível, flutuando e girando devagar. A referência de proporção é a versão em tempo real do site e a imagem `public/images/oil-poster.webp`.
+- **Líquido:** precisa parecer líquido viscoso de verdade, com escoamento ao longo da fita, ondulações e leve variação de espessura. O ideal é simulação de fluido (FLIP/SPH) ou deformação guiada por fluxo.
+- **As duas fases:**
+  - **petróleo:** preto profundo, com reflexos especulares fortes;
+  - **óleo rerrefinado:** verde-esmeralda translúcido, com luz atravessando o volume (*subsurface*/transmissão). Referência de verde: `#1c782b`, a cor da marca;
+  - a passagem de uma fase para a outra é gradual e corre junto com o fluxo, como se o líquido se limpasse enquanto anda.
+- **Complementos:** algumas gotas das duas fases soltando-se e orbitando a fita. Opcional: uma gota preta que cai na fita e "entra no ciclo".
 - **Proibido:** ícone plano, fumaça no lugar do petróleo, visual de desenho animado, texto ou logotipo dentro do vídeo, e as cores azul, dourado, amarelo e laranja.
 
 ## Câmera, luz e movimento
 
-- Câmera praticamente fixa, levemente acima do símbolo e olhando um pouco para baixo, como na imagem `public/images/oil-poster.webp`. No máximo, uma oscilação lenta de poucos graus.
-- Luz de estúdio branca, com recortes que desenhem o volume do verde e o brilho do óleo. Oclusão ambiental e sombra de contato suave na base. Profundidade de campo bem sutil.
+- Câmera praticamente fixa, de frente para a fita e levemente acima, como na imagem `public/images/oil-poster.webp`. Quem gira é a fita, devagar; a câmera faz no máximo uma oscilação lenta de poucos graus.
+- Luz de estúdio branca, com recortes que desenhem a torção e o brilho do líquido. Oclusão ambiental e sombra de contato suave na base. Profundidade de campo bem sutil.
 - Movimento calmo e contínuo, sem cortes. É o fundo da página: não pode competir com o título.
 - **Loop perfeito:** o último quadro emenda no primeiro sem salto visível. Duração entre 6 e 10 segundos.
 

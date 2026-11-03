@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { Component, useEffect, useRef, useState, type ReactNode } from "react";
 import { useReducedMotion } from "motion/react";
 
-const PetroleumScene = dynamic(() => import("./PetroleumScene"), { ssr: false });
+const MobiusScene = dynamic(() => import("./MobiusScene"), { ssr: false });
 
 export type HeroVideo = {
   /** WebM VP9 with alpha channel (Chrome, Edge, Firefox, Android). */
@@ -175,7 +175,7 @@ export function HeroStage({ accent, video }: { accent: string; video?: HeroVideo
       )}
       {(mode === "webgl-high" || mode === "webgl-medium") && (
         <SceneBoundary onError={() => setMode("static")}>
-          <PetroleumScene accent={accent} reducedMotion={reduced} quality={mode === "webgl-high" ? "high" : "medium"} />
+          <MobiusScene accent={accent} reducedMotion={reduced} quality={mode === "webgl-high" ? "high" : "medium"} />
         </SceneBoundary>
       )}
     </div>

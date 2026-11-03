@@ -42,7 +42,7 @@ Container `container-x` (máx. 90rem, margens 16/24/40 px), seções com 96–14
 
 ## Componentes
 
-Header/NavigationMenu, HeroSection, PetroleumScene/HeroStage, Reveal/SplitHeadline, SectionHeading, PageHero, SolutionCard, CompanyMetric, JobCard, JobFilters, ApplicationForm, TalentPoolForm, ContactForm, Faq, Footer, CookieConsent; no painel: AdminSidebar, JobEditor, JobStatusControls, ApplicationPipeline, ContentEditor/MediaPicker, ActionForm.
+Header/NavigationMenu, HeroSection, MobiusScene/HeroStage, Reveal/SplitHeadline, SectionHeading, PageHero, SolutionCard, CompanyMetric, JobCard, JobFilters, ApplicationForm, TalentPoolForm, ContactForm, Faq, Footer, CookieConsent; no painel: AdminSidebar, JobEditor, JobStatusControls, ApplicationPipeline, ContentEditor/MediaPicker, ActionForm.
 
 ## Acessibilidade
 
