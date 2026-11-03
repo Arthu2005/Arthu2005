@@ -39,6 +39,7 @@ npm run dev                         # http://localhost:3000  ·  painel: /admin
 | `npm run db:migrate` | Aplica migrações |
 | `npm run db:seed [-- --demo]` | Insere conteúdo inicial sem sobrescrever edições |
 | `npm run admin:create -- --email … --name … [--role admin\|recruiter\|editor]` | Cria/reativa usuário (senha via `ADMIN_PASSWORD` ou gerada) |
+| `npm run model:export` | Gera o GLB da escultura 3D (símbolo + petróleo) em `public/models/` |
 | `npm run retention:run` | Executa a exclusão LGPD de dados vencidos (agende diariamente) |
 
 ## Estrutura

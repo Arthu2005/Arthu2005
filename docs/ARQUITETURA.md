@@ -52,9 +52,19 @@ Markdown é renderizado por `src/components/Markdown.tsx`, que constrói element
 - **Cabeçalhos**: CSP, HSTS (produção), `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`; `/admin` com `noindex` e `no-store`.
 - **Dados pessoais**: IP nunca armazenado em claro (HMAC com `APP_SECRET`), e-mails de notificação interna não contêm dados do candidato.
 
-## Petróleo 3D (`PetroleumScene`)
+## Escultura 3D do hero (`PetroleumScene`)
 
-Um jato de petróleo em curva, modelado na GPU: uma faixa líquida espessa (seção elíptica fechada) percorre uma espiral animada, do rabo fino até uma coroa que se curva na ponta. Tudo é calculado no *vertex shader*. O líquido escorre ao longo da faixa (ruído transportado no sentido do fluxo), as bordas se desfazem em dedos de respingo e o conjunto gira, respira e flutua sozinho, sem depender de interação. Gotas se soltam das bordas o tempo todo e caem com gravidade (malha instanciada). Com cursor, a superfície se estica levemente na direção dele. O material é preto com *clearcoat*, num estúdio de `Lightformer` com faixas branca, verde e limão e uma borda de Fresnel limão sutil.
+Peça central: o **símbolo de reciclagem enviado pelo contratante**, vetorizado com Potrace a partir da arte original (6 peças em curvas Bézier, `src/components/site/recycle-symbol.ts`; SVG em `public/brand/simbolo-reciclagem.svg`). Ele é extrudado com chanfro e bordas arredondadas (`recycle-geometry.ts`), em material verde de alto brilho (*clearcoat*).
+
+Ao redor, o petróleo é procedural e animado na GPU:
+- um **anel líquido** espesso orbita o símbolo, passando por trás e pela frente, com o fluxo correndo pela faixa e bordas que se desfazem;
+- **filetes** pendem das bordas inferiores, formam um bulbo que se solta e cai;
+- a **poça** orgânica na base ondula no ponto onde cada gota cai;
+- **gotas suspensas** completam a composição.
+
+A iluminação vem de um estúdio de `Lightformer` (sem HDR externo), com reflexos brancos, verdes e limão, sombra de contato e, nos aparelhos de qualidade alta, oclusão ambiental (N8AO) e profundidade de campo sutil. O conjunto gira levemente acompanhando o cursor.
+
+**Modelo GLB** (`public/models/petrolub-reciclagem-petroleo.glb`, gerado por `npm run model:export`): símbolo e pose estática do petróleo, com materiais PBR separados (`PETROLUB_Verde` e `Petroleo`, ambos com `KHR_materials_clearcoat`), malhas quantizadas e cerca de 87 mil triângulos. Serve para uso em outras ferramentas; o site usa a versão procedural animada.
 
 `HeroStage` escolhe a qualidade conforme CPU, memória e tela (WebGL alto ou médio; aparelhos fracos ficam no médio). O **pôster estático** (`public/images/oil-poster.webp`) só aparece sem WebGL, no *data saver* ou em 2G. Com `prefers-reduced-motion`, a animação continua, mais lenta e suave. A renderização pausa fora da tela, e a cena só carrega quando o navegador fica ocioso, preservando o LCP (o texto do hero).
 
