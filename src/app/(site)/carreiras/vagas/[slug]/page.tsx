@@ -35,9 +35,12 @@ async function loadJob(slug: string, preview: boolean): Promise<{ job: Job | nul
   return { job: await getPublicJobBySlug(slug), isPreview: false };
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const job = await getPublicJobBySlug((await params).slug);
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
+  const [{ slug }, { preview }] = await Promise.all([params, searchParams]);
+  // same lookup as the page, so an admin previewing a draft gets the real title instead of "not found"
+  const { job, isPreview } = await loadJob(slug, preview === "1");
   if (!job) return { title: "Vaga não encontrada", robots: { index: false } };
+  if (isPreview) return { title: `Pré-visualização: ${job.title}`, robots: { index: false, follow: false } };
   return {
     title: job.seoTitle || `${job.title} — ${job.city}/${job.state}`,
     description: job.seoDescription || job.summary || `Vaga de ${job.title} na PETROLUB em ${job.city}/${job.state}.`,
@@ -110,7 +113,7 @@ export default async function JobPage({ params, searchParams }: Props) {
         </div>
       )}
       <section className="relative isolate overflow-hidden border-b border-line pt-28 pb-14 md:pt-40 md:pb-20">
-        <OilDrops />
+        <OilDrops compact />
         <div className="container-x">
           <Link href="/carreiras/vagas" className="inline-flex items-center gap-2 text-sm font-medium text-steel hover:text-ink">
             <ArrowLeft className="h-4 w-4" aria-hidden="true" /> Todas as vagas
