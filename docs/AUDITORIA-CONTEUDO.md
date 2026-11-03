@@ -12,7 +12,7 @@
 - textos de rerrefino, do óleo básico (destinado a produtoras de lubrificantes) e da cotação de óleo básico RR (dados pedidos: razão social, CNPJ, autorização ANP, volume em m³, demanda mensal ou pontual);
 - **fotos reais** das unidades, da frota, do motorista na coleta e da equipe de atendimento, otimizadas em `public/images/unidades/`.
 
-**Imagens do site oficial que não foram usadas:** ilustrações geradas por IA (arquivos “ChatGPT-Image…” e a equipe em desenho), fotos de banco de imagens (nomes numéricos ou descritivos, como “zona-industrial…” e “vista-de-cima…”), uma foto espelhada duplicada e a logomarca comemorativa de 60 anos (disponível em `wp-content/uploads/2025/05/LOGOMARCA-60-ANOS-BRANCA.png`, caso a comunicação queira usá-la). Só foram atribuídas a uma unidade específica as fotos com identificação clara: matriz (vista aérea), Duque de Caxias (página da filial) e Conceição do Jacuípe (nome do arquivo). As demais aparecem com legendas genéricas.
+**Imagens do site oficial que não foram usadas:** ilustrações geradas por IA (arquivos “ChatGPT-Image…” e a equipe em desenho), fotos de banco de imagens (nomes numéricos ou descritivos, como “zona-industrial…” e “vista-de-cima…”) e uma foto espelhada duplicada. A **logomarca comemorativa de 60 anos** (versão branca, do site oficial) é usada no rodapé: `public/brand/logo-petrolub-60-anos-white.webp`. Só foram atribuídas a uma unidade específica as fotos com identificação clara: matriz (vista aérea), Duque de Caxias (página da filial) e Conceição do Jacuípe (nome do arquivo). As demais aparecem com legendas genéricas.
 
 - petrolub.com.br — página inicial, `/quem-somos`, `/servicos`, `/estrutura-e-filiais`, `/contato`, `/coleta`
 - LinkedIn oficial da PETROLUB (publicações sobre o 0800)
