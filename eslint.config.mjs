@@ -9,6 +9,6 @@ const config = [
       "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", destructuredArrayIgnorePattern: "^_", ignoreRestSiblings: true }],
     },
   },
-  { ignores: [".next/**", "node_modules/**", "drizzle/**", "storage/**", "next-env.d.ts"] },
+  { ignores: [".next/**", "node_modules/**", "drizzle/**", "storage/**", "next-env.d.ts", "paulla-boutiq/**"] },
 ];
 export default config;

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Paulla Boutiq — Curadoria de moda autoral</title>
+    <meta name="description" content="Vitrine digital da Paulla Boutiq: peças selecionadas uma a uma, alfaiataria, vestidos e acessórios em edições limitadas." />
+    <meta name="theme-color" content="#F7F3EE" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141110" media="(prefers-color-scheme: dark)" />
+    <meta property="og:title" content="Paulla Boutiq" />
+    <meta property="og:description" content="Curadoria de moda autoral, peças em edição limitada." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script>
+      // Aplica o tema antes da pintura para evitar flash de cor.
+      (function () {
+        try {
+          var saved = localStorage.getItem("pb-theme");
+          var dark = saved ? saved === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+          document.documentElement.dataset.theme = dark ? "dark" : "light";
+        } catch (e) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>A vitrine da Paulla Boutiq precisa de JavaScript. Acompanhe as novidades em instagram.com/paullaboutiq</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

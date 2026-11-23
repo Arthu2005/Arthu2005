@@ -1,0 +1,169 @@
+@import "tailwindcss";
+@import "@fontsource-variable/bodoni-moda/opsz.css";
+@import "@fontsource-variable/bodoni-moda/opsz-italic.css";
+@import "@fontsource-variable/jost";
+
+/* O tema é controlado por data-theme no <html> (definido antes da pintura em index.html). */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ------------------------------------------------------------------
+   Tokens de marca — Paulla Boutiq
+   Base neutra (marfim / tinta), acento rosé-terracota refinado.
+   Ajuste os HEX aqui para fixar a paleta oficial da marca.
+   ------------------------------------------------------------------ */
+:root {
+  --c-canvas: #f7f3ee;        /* fundo marfim */
+  --c-surface: #efe8df;       /* superfície areia */
+  --c-surface-2: #e5dbcf;     /* superfície mais densa */
+  --c-ink: #1c1714;           /* texto principal */
+  --c-ink-soft: #5b514a;      /* texto secundário (7.1:1 no marfim) */
+  --c-line: #d9cec1;          /* bordas sutis */
+  --c-accent: #8a4b3e;        /* rosé terracota (6:1 no marfim) */
+  --c-accent-soft: #e9d3c8;   /* fundo de selos */
+  --c-on-accent: #fbf7f2;
+  --c-overlay: rgb(20 17 16 / 0.55);
+  --c-focus: #8a4b3e;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --c-canvas: #141110;
+  --c-surface: #1d1916;
+  --c-surface-2: #29231f;
+  --c-ink: #f1ebe3;
+  --c-ink-soft: #b9ada2;
+  --c-line: #3a322c;
+  --c-accent: #dba895;
+  --c-accent-soft: #3a2822;
+  --c-on-accent: #1c1714;
+  --c-overlay: rgb(0 0 0 / 0.66);
+  --c-focus: #e7bba9;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--c-canvas);
+  --color-surface: var(--c-surface);
+  --color-surface-2: var(--c-surface-2);
+  --color-ink: var(--c-ink);
+  --color-ink-soft: var(--c-ink-soft);
+  --color-line: var(--c-line);
+  --color-accent: var(--c-accent);
+  --color-accent-soft: var(--c-accent-soft);
+  --color-on-accent: var(--c-on-accent);
+  --color-overlay: var(--c-overlay);
+
+  --font-display: "Bodoni Moda Variable", "Bodoni 72", Didot, Georgia, serif;
+  --font-sans: "Jost Variable", "Futura", "Avenir Next", system-ui, sans-serif;
+
+  /* Curvas: saída suave (editorial) e microinterações ágeis */
+  --ease-editorial: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-silk: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@theme {
+  /* Tipografia fluida */
+  --text-display-xl: clamp(3.25rem, 1.6rem + 8vw, 9.5rem);
+  --text-display-xl--line-height: 0.92;
+  --text-display-lg: clamp(2.5rem, 1.5rem + 4.6vw, 5.75rem);
+  --text-display-lg--line-height: 0.98;
+  --text-display-md: clamp(1.875rem, 1.3rem + 2.4vw, 3.25rem);
+  --text-display-md--line-height: 1.05;
+  --text-eyebrow: 0.72rem;
+  --text-eyebrow--line-height: 1.2;
+  --text-eyebrow--letter-spacing: 0.24em;
+
+  --animate-shimmer: shimmer 1.6s linear infinite;
+  @keyframes shimmer {
+    from { background-position: 200% 0; }
+    to { background-position: -200% 0; }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: 5rem;
+    background: var(--c-canvas);
+  }
+  body {
+    background: var(--c-canvas);
+    color: var(--c-ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.6;
+    overflow-x: clip;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    transition: background-color 400ms var(--ease-silk), color 400ms var(--ease-silk);
+  }
+  ::selection {
+    background: var(--c-accent);
+    color: var(--c-on-accent);
+  }
+  :focus-visible {
+    outline: 2px solid var(--c-focus);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+  img {
+    -webkit-user-drag: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto !important; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html { scroll-behavior: smooth; }
+  }
+}
+
+@layer components {
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    letter-spacing: var(--text-eyebrow--letter-spacing);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .container-editorial {
+    width: 100%;
+    margin-inline: auto;
+    max-width: 90rem;
+    padding-inline: 1rem;
+  }
+  @media (min-width: 48rem) {
+    .container-editorial { padding-inline: 2rem; }
+  }
+  @media (min-width: 80rem) {
+    .container-editorial { padding-inline: 3.5rem; }
+  }
+  /* Sublinhado editorial que cresce no hover/foco */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 280ms var(--ease-editorial);
+  }
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1px;
+  }
+  /* Grão fotográfico sutil para placeholders */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+}
